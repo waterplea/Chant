@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Alex Inkin">
+    <title>Chant</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400|Raleway" rel="stylesheet">
+    <link rel="stylesheet" href="assets/styles/style.css">
+    <link href="assets/favicon.png" rel="icon" type="image/x-icon" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+    <script src="app/app.js"></script>
+</head>
+<body data-ng-app="chant" data-ng-controller="mainCtrl" data-ng-class="{ 'not-supported' : notSupported, 'playing' : isPlaying,  'form-active' : formActive  }">
+
+<main>
+    <button class="settings" data-ng-click="showform($event)"></button>
+    <h2>Welcome to <strong>Chant</strong></h2>
+    <h4>Enter your text below</h4>
+    <textarea placeholder="Chant..." data-ng-model="chant" class="chant"></textarea>
+    <button class="play" type="button" data-ng-disabled="!chant" data-ng-click="play()">Play</button>
+    <button class="stop" type="button" data-ng-click="stop()">Stop</button>
+</main>
+
+<form name="settings">
+    <label>
+        Instrument
+        <select class="float-right input" data-ng-model="instrument">
+            <option>Piano</option>
+        </select>
+    </label>
+    <label>
+        Key
+        <select class="float-right input" data-ng-model="key">
+            <option value="1">C</option>
+            <option value="1.0595">C#</option>
+            <option value="1.1225">D</option>
+            <option value="1.1892">D#</option>
+            <option value="1.2599">E</option>
+            <option value="1.3348">F</option>
+            <option value="1.4142">F#</option>
+            <option value="1.4983">G</option>
+            <option value="1.5874">G#</option>
+            <option value="1.6818">A</option>
+            <option value="1.7818">A#</option>
+            <option value="1.8877">B</option>
+        </select>
+    </label>
+    <label>
+        Octave shift
+        <input type="number" name="octave" class="float-right input" data-ng-model="octaveShift">
+    </label>
+    <label>
+        Tempo
+        <input type="number" name="tempo" class="float-right input" data-ng-model="tempo" title="Min: 30, Max: 600" min="30" max="600">
+    </label>
+    <label>
+        Loop
+        <input type="checkbox" class="float-right input" data-ng-model="loop">
+    </label>
+
+    <p>Steps</p>
+
+    <div>
+        I
+        <span class="float-right">
+            <label class="step"><input type="radio" name="i" data-ng-model="steps[0]" value="0.9439"><span>b</span></label>
+            <label class="step"><input type="radio" name="i" data-ng-model="steps[0]" value="1"><span>-</span></label>
+            <label class="step"><input type="radio" name="i" data-ng-model="steps[0]" value="1.0595"><span>#</span></label>
+        </span>
+    </div>
+    <div>
+        ii
+        <span class="float-right">
+            <label class="step"><input type="radio" name="ii" data-ng-model="steps[1]" value="0.9439"><span>b</span></label>
+            <label class="step"><input type="radio" name="ii" data-ng-model="steps[1]" value="1"><span>-</span></label>
+            <label class="step"><input type="radio" name="ii" data-ng-model="steps[1]" value="1.0595"><span>#</span></label>
+        </span>
+    </div>
+    <div>
+        iii
+        <span class="float-right">
+            <label class="step"><input type="radio" name="iii" data-ng-model="steps[2]" value="0.9439"><span>b</span></label>
+            <label class="step"><input type="radio" name="iii" data-ng-model="steps[2]" value="1"><span>-</span></label>
+            <label class="step"><input type="radio" name="iii" data-ng-model="steps[2]" value="1.0595"><span>#</span></label>
+        </span>
+    </div>
+    <div>
+        IV
+        <span class="float-right">
+            <label class="step"><input type="radio" name="iv" data-ng-model="steps[3]" value="0.9439"><span>b</span></label>
+            <label class="step"><input type="radio" name="iv" data-ng-model="steps[3]" value="1"><span>-</span></label>
+            <label class="step"><input type="radio" name="iv" data-ng-model="steps[3]" value="1.0595"><span>#</span></label>
+        </span>
+    </div>
+    <div>
+        V
+        <span class="float-right">
+            <label class="step"><input type="radio" name="v" data-ng-model="steps[4]" value="0.9439"><span>b</span></label>
+            <label class="step"><input type="radio" name="v" data-ng-model="steps[4]" value="1"><span>-</span></label>
+            <label class="step"><input type="radio" name="v" data-ng-model="steps[4]" value="1.0595"><span>#</span></label>
+        </span>
+    </div>
+    <div>
+        vi
+        <span class="float-right">
+            <label class="step"><input type="radio" name="vi" data-ng-model="steps[5]" value="0.9439"><span>b</span></label>
+            <label class="step"><input type="radio" name="vi" data-ng-model="steps[5]" value="1"><span>-</span></label>
+            <label class="step"><input type="radio" name="vi" data-ng-model="steps[5]" value="1.0595"><span>#</span></label>
+        </span>
+    </div>
+    <div>
+        vii
+        <span class="float-right">
+            <label class="step"><input type="radio" name="vii" data-ng-model="steps[6]" value="0.9439"><span>b</span></label>
+            <label class="step"><input type="radio" name="vii" data-ng-model="steps[6]" value="1"><span>-</span></label>
+            <label class="step"><input type="radio" name="vii" data-ng-model="steps[6]" value="1.0595"><span>#</span></label>
+        </span>
+    </div>
+
+    <button class="play" type="button" data-ng-disabled="!chant || !settings.tempo.$valid || !settings.octave.$valid" data-ng-click="play()">Play</button>
+    <button class="stop" type="button" data-ng-click="stop()">Stop</button>
+</form>
+
+</body>
+</html>
