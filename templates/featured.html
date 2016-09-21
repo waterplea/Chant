@@ -1,0 +1,9 @@
+<div class="popup--content">
+    <h1>{{::translate('popup.featured')}}</h1>
+    <ul class="popup--compositions">
+        <li data-ng-repeat="composition in popup.data track by $index">
+            <button type="button"  class="popup--composition" data-ng-click="loadFeatured($index)">{{composition.title}}</button>
+        </li>
+    </ul>
+</div>
+<button type="button" class="popup--button-close" data-ng-click="closePopups()">{{::translate('popup.close')}}</button>

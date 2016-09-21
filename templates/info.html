@@ -1,0 +1,23 @@
+<div class="popup--content">
+    <h1>{{::translate('popup.how')}}</h1>
+    <p>{{::translate('popup.howtextone')}}</p>
+    <p>{{::translate('popup.howtexttwo')}}</p>
+    <p>{{::translate('popup.howtextthree')}}</p>
+
+    <h1>{{::translate('popup.credits')}}</h1>
+    <div class="popup--horizontal">
+        <img class="popup--author" src="assets/images/author.png" alt="{{::translate('popup.alex')}}">
+        <div>
+            <p>{{::translate('popup.creditstextone')}} <a target="_blank" href="{{::translate('popup.alexurl')}}">{{::translate('popup.alex')}}</a>{{::translate('popup.creditstexttwo')}} <a target="_blank" href="http://waterplea.com" class="header--waterplea"></a></p>
+            <p>{{::translate('popup.creditstextthree')}}  <a target="_blank" href="http://waterplea.bandcamp.com/">{{::translate('popup.creditstextfour')}}</a></p>
+            <p>{{::translate('popup.creditstextfive')}} <a href="mailto://info@waterplea.com">info@waterplea.com</a></p>
+        </div>
+    </div>
+    <p>{{::translate('popup.code')}} <a target="_blank" class="popup--github" href="https://github.com/waterplea/Chant">Github</a></p>
+    <p>
+        <span class="help--mobile-only">© <strong>Chant 1.0.0</strong> 2016 by <a target="_blank" href="http://waterplea.com">Waterplea</a>.</span>
+        {{::translate('popup.footerone')}} <a target="_blank" href="http://www.freepik.com" title="Freepik">Freepik</a>, <a target="_blank" href="http://www.flaticon.com/authors/dale-humphries" title="Dale Humphries">Dale Humphries</a>, <a target="_blank" href="http://www.flaticon.com/authors/daniel-bruce" title="Daniel Bruce">Daniel Bruce</a>, <a target="_blank" href="http://icons8.com/">icons8</a>, <a target="_blank" href="http://www.flaticon.com/authors/yannick" title="Yannick">Yannick</a>, <a target="_blank" href="http://www.flaticon.com/authors/butterflytronics" title="Butterflytronics">Butterflytronics</a> — <a target="_blank" href="http://www.flaticon.com" title="Flaticon">flaticon.com</a>.
+        {{::translate('popup.footertwo')}} <a href="https://github.com/mattdiamond/Recorderjs">Recorder.js</a> + <a href="https://github.com/zhuker/lamejs">Lamejs</a>.
+    </p>
+</div>
+<button type="button" class="popup--button-close" data-ng-click="closePopups()">{{::translate('popup.close')}}</button>

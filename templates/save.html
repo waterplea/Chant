@@ -1,0 +1,15 @@
+<div class="popup--content">
+    <h1>{{::translate('popup.save')}}</h1>
+    <p>{{popup.data.length ? translate('popup.saved') : translate('popup.nosaved')}}</p>
+    <ul class="popup--compositions">
+        <li data-ng-repeat="composition in popup.data">
+            <button type="button" class="popup--composition" data-ng-click="saveComposition(composition.title)">{{composition.title}}</button>
+            <button type="button" title="{{::translate('popup.remove')}}" class="popup--composition-remove" data-ng-click="removeComposition(composition)"></button>
+        </li>
+    </ul>
+    <form class="popup--horizontal" data-ng-submit="saveComposition(settings.title)">
+        <input id="save-name" required class="popup--input" type="text" placeholder="{{::translate('popup.name')}}" data-ng-model="settings.title" maxlength="60">
+        <button class="popup--composition-save" type="submit" title="{{::translate('popup.savebtn')}}"></button>
+    </form>
+</div>
+<button type="button" class="popup--button-close" data-ng-click="closePopups()">{{::translate('popup.close')}}</button>

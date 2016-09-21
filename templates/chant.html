@@ -1,0 +1,73 @@
+<article class="main--track {{track.instrument}} {{track.removed}}"
+         data-ng-class="{ 'expanded' : showMore, 'muted' : track.muted }" data-ng-cloak>
+    <div data-ng-attr-contenteditable="{{ !disabled }}" class="track--chant"
+         data-ng-blur="updateStartingPosition();" data-ng-keypress="playChar($event)"
+         data-placeholder="{{::translate('chant.placeholder')}}"></div>
+
+    <aside class="track--aside">
+        <label class="track--instrument" title="{{::translate('chant.instrument')}}">
+            <select data-ng-model="track.instrument" data-ng-change="loadSamples(track.instrument)">
+                <!--<option value="acoustic">{{::translate('instruments.acoustic')}}</option>-->
+                <option value="electric">{{::translate('instruments.electric')}}</option>
+                <!--<option value="bass">{{::translate('instruments.bass')}}</option>-->
+                <option value="harmonics">{{::translate('instruments.harmonics')}}</option>
+                <option value="ebow">{{::translate('instruments.ebow')}}</option>
+                <option value="piano">{{::translate('instruments.piano')}}</option>
+                <!--<option value="rhodes">{{::translate('instruments.rhodes')}}</option>-->
+                <option value="synth">{{::translate('instruments.synth')}}</option>
+                <!--<option value="organ">{{::translate('instruments.organ')}}</option>-->
+                <!--<option value="hammond">{{::translate('instruments.hammond')}}</option>-->
+                <!--<option value="violin">{{::translate('instruments.violin')}}</option>-->
+                <!--<option value="cello">{{::translate('instruments.cello')}}</option>-->
+                <!--<option value="double">{{::translate('instruments.double')}}</option>-->
+                <option value="harmonica">{{::translate('instruments.harmonica')}}</option>
+                <!--<option value="flute">{{::translate('instruments.flute')}}</option>-->
+                <!--<option value="chimes">{{::translate('instruments.chimes')}}</option>-->
+                <!--<option value="bell">{{::translate('instruments.bell')}}</option>-->
+                <!--<option value="sax">{{::translate('instruments.sax')}}</option>-->
+                <!--<option value="tank">{{::translate('instruments.tank')}}</option>-->
+                <!--<option value="drums">{{::translate('instruments.drums')}}</option>-->
+                <option value="waterplea">{{::translate('instruments.waterplea')}}</option>
+            </select>
+            <span></span>
+        </label>
+        <span class="track--volume">
+            <label class="track--mute" title="{{::translate('chant.mute')}}"><input data-ng-model="track.muted" type="checkbox"><span></span></label>
+            <input class="track--volume-input" title="{{::translate('chant.volume')}}" data-ng-disabled="track.muted" type="range" data-ng-model="track.volume" min="0" max="50">
+        </span>
+        <label class="track--panning" title="{{::translate('chant.panning')}}">
+            <input class="track--panning-input" type="range" data-ng-model="track.panning" min="-25" max="25"><span></span>
+        </label>
+        <label class="track--octave" title="{{::translate('chant.octave')}}">
+            <input class="track--octave-input" type="number" data-ng-model="track.octave" min="-5" max="5" maxlength="2"><span></span>
+        </label>
+        <div class="track--aside-more">
+            <span class="track--effects">
+                <label class="track--dry" title="{{::translate('chant.effects')}}"><input data-ng-model="track.dry" type="checkbox"><span></span></label>
+                <input class="track--effects-input" title="{{::translate('chant.amount')}}" data-ng-disabled="track.dry" type="range" data-ng-model="track.effects" min="0" max="50">
+            </span>
+            <label class="track--lock" title="{{::translate('chant.lock')}}"><input data-ng-model="track.locked" type="checkbox"><span>{{::translate('chant.locklabel')}}</span></label>
+            <label class="track--key" title="{{::translate('chant.key')}}">
+                <select data-ng-model="track.key" data-ng-disabled="track.locked">
+                    <option value="1">C</option>
+                    <option value="1.0595">C#</option>
+                    <option value="1.1225">D</option>
+                    <option value="1.1892">D#</option>
+                    <option value="1.2599">E</option>
+                    <option value="1.3348">F</option>
+                    <option value="1.4142">F#</option>
+                    <option value="1.4983">G</option>
+                    <option value="1.5874">G#</option>
+                    <option value="1.6818">A</option>
+                    <option value="1.7818">A#</option>
+                    <option value="1.8877">B</option>
+                </select>
+                <span></span>
+            </label>
+            <button class="track--keys" type="button" title="{{::translate('chant.accidentals')}}" data-ng-disabled="track.locked" data-ng-click="showAccidentals()"></button>
+        </div>
+        <button class="track--solo" type="button" title="{{::translate('chant.solo')}}" data-ng-click="solo()"></button>
+        <button class="track--more" type="button" title="{{::translate('chant.more')}}" data-ng-click="showMore = !showMore"></button>
+    </aside>
+    <button class="track--remove" type="button" title="{{::translate('chant.remove')}}"></button>
+</article>

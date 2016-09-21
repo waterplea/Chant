@@ -1,0 +1,34 @@
+<div class="popup--content">
+    <h1>{{::translate('popup.share')}}</h1>
+    <p>{{::translate('popup.sharetext')}}</p>
+    <p class="popup--horizontal" data-ng-click="doShare($event)">
+        <button type="button" class="popup--share-button facebook" title="{{::translate('popup.facebook')}}"></button>
+        <button type="button" class="popup--share-button twitter" title="{{::translate('popup.twitter')}}"></button>
+        <button type="button" class="popup--share-button vk" title="{{::translate('popup.vk')}}"></button>
+        <button type="button" class="popup--share-button google" title="{{::translate('popup.google')}}"></button>
+        <button type="button" class="popup--share-button pinterest" title="{{::translate('popup.pinterest')}}"></button>
+        <button type="button" class="popup--share-button tumblr" title="{{::translate('popup.tumblr')}}"></button>
+        <button type="button" class="popup--share-button reddit" title="{{::translate('popup.reddit')}}"></button>
+        <button type="button" class="popup--share-button linkedin" title="{{::translate('popup.linkedin')}}"></button>
+        <button type="button" class="popup--share-button email" title="{{::translate('popup.email')}}"></button>
+    </p>
+    <h1>{{::translate('popup.sharecomp')}}</h1>
+    <p>{{::translate('popup.sharecomptext')}}</p>
+    <p class="popup--horizontal" data-ng-click="doShare($event, true)">
+        <button type="button" class="popup--share-button facebook" title="{{::translate('popup.facebook')}}"></button>
+        <button type="button" class="popup--share-button vk" title="{{::translate('popup.vk')}}"></button>
+        <button type="button" class="popup--share-button google" title="{{::translate('popup.google')}}"></button>
+        <button type="button" class="popup--share-button pinterest" title="{{::translate('popup.pinterest')}}"></button>
+        <button type="button" class="popup--share-button tumblr" title="{{::translate('popup.tumblr')}}"></button>
+        <button type="button" class="popup--share-button reddit" title="{{::translate('popup.reddit')}}"></button>
+        <button type="button" class="popup--share-button linkedin" title="{{::translate('popup.linkedin')}}"></button>
+        <button type="button" class="popup--share-button email" title="{{::translate('popup.email')}}"></button>
+    </p>
+    <p class="popup--horizontal">
+        <input id="link" onclick="this.setSelectionRange(0, this.value.length)" readonly type="text" data-ng-model="popup.data" class="popup--input">
+        <button data-ng-if="::state.isCopySupported" title="{{::translate('popup.copy')}}" type="button" class="popup--button-copy" data-ng-click="copyLink($event)"></button>
+    </p>
+    <p>{{::translate('popup.link')}}</p>
+    <p><i><strong>{{::translate('popup.tip')}}</strong> {{::translate('popup.sharetip')}} <a target='_blank' href='https://goo.gl/'>Google URL Shortener</a></i></p>
+</div>
+<button type="button" class="popup--button-close" data-ng-click="closePopups()">{{::translate('popup.close')}}</button>

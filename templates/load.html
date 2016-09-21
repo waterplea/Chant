@@ -1,0 +1,11 @@
+<div class="popup--content">
+    <h1>{{::translate('popup.load')}}</h1>
+    <p>{{popup.data.length ? translate('popup.saved') : translate('popup.nosaved')}}</p>
+    <ul class="popup--compositions">
+        <li data-ng-repeat="composition in popup.data">
+            <button type="button" class="popup--composition" data-ng-click="loadComposition(composition.title)">{{composition.title}}</button>
+            <button type="button" title="{{::translate('popup.remove')}}" class="popup--composition-remove" data-ng-click="removeComposition(composition)"></button>
+        </li>
+    </ul>
+</div>
+<button type="button" class="popup--button-close" data-ng-click="closePopups()">{{::translate('popup.close')}}</button>

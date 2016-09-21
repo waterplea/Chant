@@ -1,0 +1,16 @@
+<div class="popup--content">
+    <h1>{{::translate('popup.title')}}</h1>
+    <p>
+        <input class="popup--input popup--input-notes" type="text" placeholder="{{::translate('popup.titlepl')}}" data-ng-model="settings.title" maxlength="60">
+    </p>
+    <h1>{{::translate('popup.author')}}</h1>
+    <p>
+        <input class="popup--input popup--input-notes" type="text" placeholder="{{::translate('popup.authorpl')}}" data-ng-model="settings.author" maxlength="60">
+    </p>
+    <h1>{{::translate('popup.notes')}}</h1>
+    <p class="popup--notes">
+        <textarea class="popup--input popup--input-notes" placeholder="{{::translate('popup.notespl')}}" data-ng-model="settings.notes"></textarea>
+    </p>
+    <label class="popup--input-show"><input type="checkbox" data-ng-model="settings.splashscreen"><span></span>{{::translate('popup.splashscreen')}}</label>
+</div>
+<button type="button" class="popup--button-close" data-ng-click="closePopups()">{{::translate('popup.close')}}</button>

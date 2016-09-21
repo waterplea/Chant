@@ -1,0 +1,6 @@
+<div class="popup--content">
+    <h1>{{settings.title}}</h1>
+    <p>by {{settings.author ? settings.author : translate('popup.noauthor')}}</p>
+    <textarea class="popup--splashscreen-notes" readonly tabindex="-1">{{settings.notes ? settings.notes : translate('popup.nonotes')}}</textarea>
+</div>
+<button type="button" class="popup--button-close" data-ng-click="closePopups()">{{::translate('popup.close')}}</button>

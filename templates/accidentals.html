@@ -1,0 +1,50 @@
+<div class="popup--content accidentals">
+    <h1>{{::translate('popup.accidentals')}}</h1>
+    <section class="accidentals--piano">
+        <button type="button" tabindex="-1" class="key-{{::key}}"
+                data-ng-class="{ 'selected' : isStepInScale($index, popup.data) }"
+                title="{{::notes[key - 1]}}" data-ng-mousedown="playStep($index, popup.data)"
+                data-ng-repeat="key in ::keys[popup.data.key] track by $index"></button>
+    </section>
+    <section class="accidentals--steps">
+        <div class="accidentals--step">
+            <label class="accidentals--step-label" title="{{::translate('popup.flat')}}"><input type="radio" name="i" data-ng-model="popup.data.keys[0]" value="0.9439"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.natural')}}"><input type="radio" name="i" data-ng-model="popup.data.keys[0]" value="1"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.sharp')}}"><input type="radio" name="i" data-ng-model="popup.data.keys[0]" value="1.0595"><span></span></label>
+        </div>
+        <div class="accidentals--step">
+            <label class="accidentals--step-label" title="{{::translate('popup.flat')}}"><input type="radio" name="ii" data-ng-model="popup.data.keys[1]" value="0.9439"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.natural')}}"><input type="radio" name="ii" data-ng-model="popup.data.keys[1]" value="1"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.sharp')}}"><input type="radio" name="ii" data-ng-model="popup.data.keys[1]" value="1.0595"><span></span></label>
+        </div>
+        <div class="accidentals--step">
+            <label class="accidentals--step-label" title="{{::translate('popup.flat')}}"><input type="radio" name="iii" data-ng-model="popup.data.keys[2]" value="0.9439"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.natural')}}"><input type="radio" name="iii" data-ng-model="popup.data.keys[2]" value="1"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.sharp')}}"><input type="radio" name="iii" data-ng-model="popup.data.keys[2]" value="1.0595"><span></span></label>
+        </div>
+        <div class="accidentals--step">
+            <label class="accidentals--step-label" title="{{::translate('popup.flat')}}"><input type="radio" name="iv" data-ng-model="popup.data.keys[3]" value="0.9439"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.natural')}}"><input type="radio" name="iv" data-ng-model="popup.data.keys[3]" value="1"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.sharp')}}"><input type="radio" name="iv" data-ng-model="popup.data.keys[3]" value="1.0595"><span></span></label>
+        </div>
+        <div class="accidentals--step">
+            <label class="accidentals--step-label" title="{{::translate('popup.flat')}}"><input type="radio" name="v" data-ng-model="popup.data.keys[4]" value="0.9439"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.natural')}}"><input type="radio" name="v" data-ng-model="popup.data.keys[4]" value="1"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.sharp')}}"><input type="radio" name="v" data-ng-model="popup.data.keys[4]" value="1.0595"><span></span></label>
+        </div>
+        <div class="accidentals--step">
+            <label class="accidentals--step-label" title="{{::translate('popup.flat')}}"><input type="radio" name="vi" data-ng-model="popup.data.keys[5]" value="0.9439"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.natural')}}"><input type="radio" name="vi" data-ng-model="popup.data.keys[5]" value="1"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.sharp')}}"><input type="radio" name="vi" data-ng-model="popup.data.keys[5]" value="1.0595"><span></span></label>
+        </div>
+        <div class="accidentals--step">
+            <label class="accidentals--step-label" title="{{::translate('popup.flat')}}"><input type="radio" name="vii" data-ng-model="popup.data.keys[6]" value="0.9439"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.natural')}}"><input type="radio" name="vii" data-ng-model="popup.data.keys[6]" value="1"><span></span></label>
+            <label class="accidentals--step-label" title="{{::translate('popup.sharp')}}"><input type="radio" name="vii" data-ng-model="popup.data.keys[6]" value="1.0595"><span></span></label>
+        </div>
+    </section>
+    <p class="accidentals--tip">
+        {{::translate('popup.accidentalstip')}}
+    </p>
+</div>
+<button type="button" class="popup--button-close" data-ng-click="closePopups()">{{::translate('popup.close')}}</button>
