@@ -1,5 +1,5 @@
 <div class="popup--content">
-    <h1>{{settings.title}}</h1>
+    <h1>{{settings.title ? settings.title : translate('popup.notitle')}}</h1>
     <p>by {{settings.author ? settings.author : translate('popup.noauthor')}}</p>
     <textarea class="popup--splashscreen-notes" readonly tabindex="-1">{{settings.notes ? settings.notes : translate('popup.nonotes')}}</textarea>
 </div>

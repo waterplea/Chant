@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html data-ng-app="Chant" data-ng-controller="chantController"
-      data-ng-class="{ 'loading' : state.isLoading, 'playing': state.isPlaying, 'first-visit': state.isFirstVisit, 'menu-visible': state.isMenuVisible }">
+      data-ng-class="{ 'playing': state.isPlaying, 'first-visit': state.isFirstVisit, 'menu-visible': state.isMenuVisible }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Waterplea">
     <meta name="theme-color" content="#a24bcf">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Chant by Waterplea</title>
 
     <meta property="og:title" content="Chant by Waterplea" />
@@ -19,36 +21,42 @@
     <link href="assets/favicon.png" rel="icon" type="image/x-icon" />
 
     <script src="assets/lib/recorder.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
-    <script src="app/howto.js"></script>
+    <script src="assets/lib/angular.min.js"></script>
     <script src="app/app.js"></script>
     <script src="app/services.js"></script>
     <script src="app/controllers.js"></script>
     <script src="app/directives.js"></script>
 </head>
-<body data-ng-class="::{ 'not-supported' : notSupported }"
-      data-notsupported="Web Audio API is not supported in this browser"
-      data-loading="{{::translate('ui.loading')}}">
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-<div class="tooltip">{{::translate('ui.howto')}}</div>
+  ga('create', 'UA-85397246-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+<body data-ng-class="::{ 'not-supported' : notSupported }"
+      data-notsupported="Web Audio API is not supported in this browser">
 
 <fieldset data-ng-disabled="popup" class="body--disabler">
     <div class="content">
         <header>
-            <button type="button" class="header--menu" data-ng-click="state.isMenuVisible = !state.isMenuVisible" data-howto-step="6" data-howto-text="{{::translate('howto.menu')}}"></button>
+            <button type="button" class="header--menu" data-ng-click="state.isMenuVisible = !state.isMenuVisible"></button>
             <h2>
                 <span class="header--logo"></span>
                 <span class="header--title">
-                    <strong>Chant</strong> by <a href="http://waterplea.com" tabindex="{{isInputBlocked() ? '-1' : '0'}}" class="header--waterplea"></a>
+                    <strong>Chant</strong> by <a href="http://waterplea.com" target="_blank" tabindex="{{isInputBlocked() ? '-1' : '0'}}" class="header--waterplea"></a>
                 </span>
             </h2>
-            <section class="header--controls" data-howto-step="1" data-howto-text="{{::translate('howto.play')}}">
-                <button class="header--controls-play" type="button" title="{{state.isPlaying ? translate('ui.stop') : translate('ui.stop')}}" data-ng-click="state.isPlaying ? stop() : play()"></button>
+            <section class="header--controls">
+                <button class="header--controls-play" type="button" title="{{state.isPlaying ? translate('ui.stop') : translate('ui.play')}}" data-ng-click="buttons.play()"></button>
                 <label class="header--controls-loop" title="{{::translate('ui.loop')}}"><input data-ng-model="settings.loop" type="checkbox"><span></span></label>
-                <label class="header--controls-keyboard" title="{{::translate('ui.keyboard')}}"><input data-ng-model="settings.keyboard" type="checkbox"><span></span></label>
+                <label class="header--controls-keyboard" title="{{::translate('ui.keyboard')}}" data-ng-click="wakeSafari()"><input data-ng-model="settings.keyboard" type="checkbox"><span></span></label>
                 <button class="header--controls-share" type="button" title="{{::translate('ui.share')}}" data-ng-click="buttons.share()"></button>
             </section>
-            <section class="header--controls" data-howto-step="1" data-howto-text="{{::translate('howto.settingsDesktop')}}">
+            <section class="header--controls">
                 <label class="header--controls-bpm" title="{{::translate('ui.tempo')}}">
                     <input id="tempo" data-ng-model="settings.tempo" data-ng-disabled="state.isPlaying" type="number" min="30" max="600" maxlength="3">bpm
                 </label>
@@ -71,16 +79,28 @@
                 <button class="header--controls-keys" type="button" title="{{::translate('ui.accidentals')}}" data-ng-click="buttons.popup('accidentals', settings)"></button>
             </section>
             <section class="header--controls">
-                <button class="header--controls-help howto-trigger" type="button" title="{{::translate('ui.help')}}" data-ng-click="help($event)"></button>
+                <button class="header--controls-help" type="button" title="{{::translate('ui.help')}}" tabindex="-1"></button>
+                <button class="tooltip tooltip--header bottom center" tabindex="-1">
+                    <div><span class="help--play"></span>{{::translate('help.play')}}</div>
+                    <div><span class="help--loop"></span>{{::translate('help.loop')}}</div>
+                    <div><span class="help--keyboard"></span>{{::translate('help.keyboard')}}</div>
+                    <p><i>{{::translate('help.keyboardtip')}}</i></p>
+                    <div><span class="help--share"></span>{{::translate('help.share')}}</div>
+                    <div><span class="help--bpm"></span>{{::translate('help.tempo')}}</div>
+                    <div><span class="help--key"></span>{{::translate('help.key')}}</div>
+                    <div><span class="help--keys"></span>{{::translate('help.accidentals')}}</div>
+                    <br>
+                    <div><i>{{::translate('help.more')}}</i></div>
+                </button>
             </section>
         </header>
 
         <main>
             <button type="button" class="main--button-add" data-ng-click="addTrack()" data-ng-cloak>{{::translate('ui.add')}}</button>
+			
+			<chant data-ng-click="scrollTo($event, track)" class="{{lastTrack === track && settings.keyboard ? 'current' : ''}}" data-ng-repeat="track in tracks | orderBy:'':true" disabled="state.isPlaying || isInputBlocked()" data-ng-model="track" data-ng-cloak></chant>
 
-            <chant data-ng-click="scrollTo($event, track)" class="{{lastTrack === track && settings.keyboard ? 'current' : ''}}" data-ng-repeat="track in tracks | orderBy:'':true" disabled="state.isPlaying || isInputBlocked()" data-ng-model="track" data-ng-cloak></chant>
-
-            <nav data-howto-step="6" data-howto-text="{{::translate('howto.menu')}}" data-ng-cloak>
+            <nav data-ng-cloak>
                 <button type="button" class="nav--button clear" data-ng-click="buttons.clear()">{{::translate('ui.clear')}}</button>
                 <button type="button" class="nav--button featured" data-ng-click="buttons.featured()">{{::translate('ui.featured')}}</button>
                 <button type="button" class="nav--button save" data-ng-click="buttons.save()">{{::translate('ui.save')}}</button>
@@ -94,12 +114,24 @@
         <footer data-ng-class="{ 'expanded' : showSettings }" data-ng-cloak>
             <div class="footer--desktop">© 2016 by <a target="_blank" href="http://waterplea.com" tabindex="{{isInputBlocked() ? '-1' : '0'}}">Waterplea</a>. {{::translate('ui.check')}} <a target="_blank" href="http://waterplea.bandcamp.com/" tabindex="{{isInputBlocked() ? '-1' : '0'}}">{{::translate('ui.our')}}</a>.</div>
             <div class="footer--mobile">
-                <section class="footer--controls" data-howto-step="1" data-howto-text="{{::translate('howto.play')}}">
-                    <button class="footer--controls-settings" type="button" title="{{::translate('ui.settings')}}" data-ng-click="showSettings = !showSettings" data-howto-step="2" data-howto-text="{{::translate('howto.settings')}}"></button>
-                    <button class="footer--controls-play" type="button" title="{{state.isPlaying ? translate('ui.stop') : translate('ui.play')}}" data-ng-click="state.isPlaying ? stop() : play()"></button>
+                <section class="footer--controls">
+                    <button class="footer--controls-settings" type="button" title="{{::translate('ui.settings')}}" data-ng-click="showSettings = !showSettings"></button>
+                    <button class="footer--controls-play" type="button" title="{{state.isPlaying ? translate('ui.stop') : translate('ui.play')}}" data-ng-click="buttons.play()"></button>
                     <label class="footer--controls-loop" title="{{::translate('ui.loop')}}"><input data-ng-model="settings.loop" type="checkbox"><span></span></label>
+                    <label class="footer--controls-keyboard" title="{{::translate('ui.keyboard')}}" data-ng-click="wakeSafari()"><input data-ng-model="settings.keyboard" type="checkbox"><span></span></label>
                     <button class="footer--controls-share" type="button" title="{{::translate('ui.share')}}" data-ng-click="buttons.share()"></button>
-                    <button class="footer--controls-help howto-trigger" type="button" title="{{::translate('ui.help')}}" data-ng-click="help($event)"></button>
+                    <button class="footer--controls-help" type="button" title="{{::translate('ui.help')}}" tabindex="-1"></button>
+                    <button class="tooltip tooltip--footer bottom center" tabindex="-1">
+                        <div><span class="help--play"></span>{{::translate('help.play')}}</div>
+                        <div><span class="help--loop"></span>{{::translate('help.loop')}}</div>
+                        <div><span class="help--keyboard"></span>{{::translate('help.keyboard')}}</div>
+                        <div><span class="help--share"></span>{{::translate('help.share')}}</div>
+                        <div>{{::translate('help.tap')}}<span class="help--settings"></span>{{::translate('help.settings')}}</div>
+                        <div><span class="help--bpm"></span>{{::translate('help.tempo')}}</div>
+                        <div><span class="help--key"></span>{{::translate('help.key')}}</div>
+                        <div><span class="help--keys"></span>{{::translate('help.accidentals')}}</div>
+                        <div><i>{{::translate('help.more')}}</i></div>
+                    </button>
                 </section>
                 <section class="footer--controls additional">
                     <label class="footer--controls-bpm" title="{{::translate('ui.tempo')}}">
@@ -142,7 +174,11 @@
     </div>
 </section>
 
-<section id="progress" class="progress" data-text="{{::translate('ui.encoding')}}" data-progress="false"></section>
+<div class="tooltip initial">{{::translate('ui.howto')}}</div>
+
+<section id="progress" class="progress" data-progress="false" data-text="{{::translate('ui.encoding')}}">{{::translate('ui.encoding')}}</section>
+
+<section class="undo" data-ng-if="undo">{{undo.text}} <button class="undo--button" type="button" data-ng-click="undo.func()">{{::translate('ui.undo')}}</button></section>
 
 </body>
 </html>

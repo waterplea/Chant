@@ -2,23 +2,24 @@
     'use strict';
     var app = window.angular.module('Chant');
 
-    app.directive('chant', ['chantService', function(chantService) {
+    app.directive('chant', ['chantService', '$timeout', function(chantService, $timeout) {
         return {
             require: 'ngModel',
             restrict: 'E',
             scope: {
                 disabled: '=',
-                first: '=',
                 ngModel: '='
             },
             replace: true,
             templateUrl: 'templates/chant.html',
             controller: ['$scope', function ($scope) {
                 $scope.loadSamples = function(instrument) {
-                    $scope.$emit('loadingStart', instrument);
-
+                    $scope.isLoading = true;
+                    chantService.reWire($scope.track);
                     chantService.loadSamples(instrument, function() {
-                        $scope.$emit('loadingEnd', instrument);
+                        $timeout(function() {
+                            $scope.isLoading = false;
+                        })
                     });
                 };
 
@@ -40,18 +41,19 @@
                 };
             }],
             link: function(scope, element) {
-                //TODO: Fix panning bug, add keyboard playback to mobile, fix iOS
                 var xDown, yDown, xDiff, yDiff;
+                var prevValue = '';
 
                 scope.track = scope.ngModel;
-                element[0].querySelector('.track--chant').innerHTML = scope.track.chant;
 
-                if (document.querySelectorAll('.main--track').length === 1) {
-                    element[0].querySelector('.track--aside').setAttribute('data-howto-step', 3);
-                    element[0].querySelector('.track--aside').setAttribute('data-howto-text', chantService.translate('howto.instrument'));
-                    element[0].querySelector('.track--more').setAttribute('data-howto-step', 4);
-                    element[0].querySelector('.track--more').setAttribute('data-howto-text', chantService.translate('howto.more'));
-                }
+                scope.isLoading = true;
+                chantService.loadSamples(scope.track.instrument, function() {
+                    $timeout(function() {
+						scope.isLoading = false;
+					});
+                });
+
+                element[0].querySelector('.track--chant').innerHTML = scope.track.chant;
 
                 element[0].addEventListener('touchstart', handleTouchStart, false);
                 element[0].addEventListener('touchmove', handleTouchMove, false);
@@ -83,7 +85,7 @@
                         }
                     }
 
-                    scope.$apply();
+                    scope.$digest();
                 }
 
                 function handleTouchStart(event) {
@@ -109,13 +111,13 @@
                 }
 
                 function handleTouchEnd(event) {
+                    event.currentTarget.style.transform = '';
+                    event.currentTarget.style.transition = '';
                     if (xDiff > 150) {
                         scope.$emit('removeTrack', { track: scope.track, direction: 'left' });
                     } else if (xDiff < -150) {
                         scope.$emit('removeTrack', { track: scope.track, direction: 'right' });
                     }
-
-                    event.currentTarget.style = '';
                 }
 
                 function getCaretCharacterOffsetWithin(element) {
@@ -131,7 +133,43 @@
                     return caretOffset;
                 }
 
+                function getDifference(a, b) {
+                    var i = 0;
+                    var j = 0;
+                    var result = "";
+
+                    while (j < b.length)
+                    {
+                        if (a[i] != b[j] || i == a.length)
+                            result += b[j];
+                        else
+                            i++;
+                        j++;
+                    }
+                    return result;
+                }
+
+                function parseInput(input) {
+                    var result = '';
+
+                    if (prevValue.length && input.length > prevValue.length) {
+                        result = getDifference(prevValue, input);
+                    }
+
+                    if (input.length === 1) {
+                        result = input;
+                    }
+
+                    prevValue = input;
+                    scope.$emit('charPressed', result);
+                }
+
                 element[0].querySelector('.track--chant').addEventListener('input', function(event) {
+                    scope.track.chant = event.target.textContent;
+                    if (event.target.innerHTML === event.target.textContent) {
+                        parseInput(event.target.textContent);
+                        return;
+                    }
                     var position = getCaretCharacterOffsetWithin(event.target);
                     event.target.innerHTML = event.target.textContent.replace('<', '&lt;');
                     var range = document.createRange();
@@ -144,14 +182,41 @@
                     range.collapse(true);
                     sel.removeAllRanges();
                     sel.addRange(range);
-                });
 
-                element[0].querySelector('.track--chant').addEventListener('blur', function(event) {
-                    scope.track.chant = event.target.textContent;
+                    parseInput(event.target.textContent);
                 });
 
                 scope.$watch('track.chant', function(value) {
-                    element[0].querySelector('.track--chant').innerHTML = value;
+                    if (element[0].querySelector('.track--chant').innerHTML !== value) element[0].querySelector('.track--chant').innerHTML = value;
+                });
+
+                scope.$watch('disabled', function(value) {
+                    if (!value || scope.track.chant.length !== 1) {
+                        return;
+                    }
+
+                    var match;
+
+                    switch (scope.track.chant.charAt(0)) {
+                        case 'C':
+                        case 'c':
+                        case 'D':
+                        case 'd':
+                        case 'E':
+                        case 'e':
+                        case 'F':
+                        case 'f':
+                        case 'G':
+                        case 'g':
+                        case 'A':
+                        case 'a':
+                        case 'B':
+                        case 'b':
+                            match = true;
+                            break;
+                    }
+
+                    element[0].querySelector('.track--chant').innerHTML = '<span class="track--chant-current ' + (match ? 'match' : '') + '">' + element[0].querySelector('.track--chant').textContent + '</span>';
                 });
 
                 scope.$watch('track.currentLetter', function(value) {

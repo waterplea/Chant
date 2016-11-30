@@ -40,18 +40,25 @@
     100% { opacity: 1 }
 }
 
+@keyframes loading {
+    0% { left: -100% }
+    100% { left: 100% }
+}
+
+@keyframes undo {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 20px, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+
 @keyframes currentLetter {
     0% { transform: translateX(-9px); }
     100% { transform: none }
-}
-
-@keyframes loading {
-    0% {
-        transform: none;
-    }
-    100% {
-        transform: rotate(360deg);
-    }
 }
 
 @keyframes slideIn {
@@ -122,66 +129,20 @@
     }
 }
 
+//Arrogant iOS input autostyling fix
+textarea,
+input,
+select {
+    -webkit-appearance: none;
+    border-radius: 0;
+}
+
 html, body {
+    position: fixed;
     width: 100%;
+    min-width: 320px;
     height: 100%;
     margin: 0;
-    overflow: hidden;
-}
-
-html {
-    &.loading {
-        body::after {
-            pointer-events: auto;
-        }
-
-        .body--disabler::after,
-        .content::after,
-        body::after,
-        &::after {
-            opacity: 1;
-            transition: opacity 0.3s 0.3s ease;
-        }
-    }
-}
-
-html::after,
-.body--disabler::after,
-.content::after {
-    content: '';
-    position: fixed;
-    height: 60px;
-    width: 60px;
-    top: ~"calc(45vh - 70px)";
-    left: ~"calc(50vw - 35px)";
-    background: @logo-gradient top -6px left -6px;
-    background-size: 120%;
-    border-radius: 100%;
-    border: 6px solid transparent;
-    border-top: 3px solid white;
-    border-bottom: 3px solid white;
-    pointer-events: none;
-    opacity: 0;
-    z-index: 3;
-    transition: opacity 0.2s ease;
-    animation: loading 1.5s linear infinite;
-}
-
-html::after {
-    background: none;
-    border: 0 solid transparent;
-    border-left: 10px solid white;
-    border-right: 10px solid white;
-    animation: loading 1.3s linear reverse infinite;
-}
-
-.content::after {
-    z-index: 4;
-    background: none;
-    border: 0 solid transparent;
-    border-left: 20px solid white;
-    border-right: 10px solid white;
-    animation: loading 1.2s linear reverse infinite;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -226,6 +187,10 @@ a {
     }
 }
 
+.disable-hover {
+    pointer-events: none;
+}
+
 body {
     box-sizing: border-box;
     color: @text-color;
@@ -242,23 +207,6 @@ body {
             line-height: 100vh;
             content: attr(data-notsupported);
         }
-    }
-
-    &::after {
-        content: attr(data-loading);
-        background: fade(white, 95%);
-        padding: 48vh 0;
-        text-align: center;
-        font-size: 24px;
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        pointer-events: none;
-        opacity: 0;
-        z-index: 2;
-        transition: opacity 0.3s ease;
     }
 }
 
@@ -365,84 +313,141 @@ body {
     font-weight: 300;
 }
 
-.tooltip {
+.undo {
     position: fixed;
-    font-size: 18px;
-    font-weight: 400;
+    z-index: 3;
+    bottom: 60px;
     right: 20px;
-    padding: 20px;
-    width: 220px;
-    text-align: center;
-    bottom: 80px;
-    background: @links-color;
     color: white;
-    box-shadow: 4px 4px fade(@text-color, 10%);
-    border-radius: 10px;
-    pointer-events: none;
-    opacity: 0;
-    transform: scale(0.01);
+    background: #444;
+    padding: 5px 10px;
+    border-radius: 3px;
+    box-shadow: 2px 2px fade(black, 10%);
+    overflow: hidden;
+    animation: undo 0.5s ease;
     transition: transform 0.3s ease, opacity 0.3s ease;
 
-    &::before {
-        content: '';
-        position: absolute;
-        right: 20px;
-        border-left: 20px solid transparent;
-        box-shadow: 5px 5px fade(@text-color, 10%);
-        bottom: -30px;
-        border-top: 30px solid @links-color;
-        transform: skewX(10deg);
-    }
-
-    &::after {
-        content: '';
-        position: absolute;
-        background: @links-color;
-        right: 10px;
-        top: 0;
-        height: 10px;
-        width: 50px;
+    &.closing {
+        transform: translate3d(300px, 0, 0);
+        opacity: 0;
     }
 }
 
-.desktop-only {
-    margin: 1em 0;
+.undo--button {
+    background: none;
+    font-size: 14px;
+    color: @buttons-color;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 2px;
+    margin-left: 20px;
+    cursor: pointer;
 }
 
-.howto-curtain {
-    position: fixed;
+.help--play,
+.help--loop,
+.help--share,
+.help--settings,
+.help--bpm,
+.help--key,
+.help--keys,
+.help--keyboard,
+.help--sharp,
+.help--neutral,
+.help--flat {
+    display: inline-block;
+    border: none;
+    width: 24px;
+    height: 40px;
+    opacity: 0.7;
+    vertical-align: middle;
+    margin-right: 11px;
+}
+
+.help--sharp {
+    background: url(../images/sharp.svg) center no-repeat;
+    background-size: 24px;
+}
+
+.help--neutral {
+    background: url(../images/natural.svg) center no-repeat;
+    background-size: 24px;
+}
+
+.help--flat {
+    background: url(../images/flat.svg) center no-repeat;
+    background-size: 24px;
+}
+
+.help--play {
+    background: url(../images/play.svg) center no-repeat;
+    background-size: 24px;
+}
+
+.help--loop {
+    background: url(../images/loop.svg) center no-repeat;
+    background-size: 24px;
+}
+
+.help--share {
+    background: url(../images/share.svg) center no-repeat;
+    background-size: 24px;
+}
+
+.help--settings {
+    background: url(../images/settings.svg) center no-repeat;
+    background-size: 24px;
+    margin: 0 10px;
+}
+
+.help--bpm {
+    background: url(../images/metronome.svg) center no-repeat;
+    background-size: 24px;
+}
+
+.help--key {
+    background: url(../images/key.svg) center no-repeat;
+    background-size: 24px;
+}
+
+.help--keys {
+    background: url(../images/keys.svg) center no-repeat;
+    background-size: 30px;
+    width: 30px;
+    margin-right: 5px;
+}
+
+.help--keyboard {
+    background: url(../images/keyboard.svg) center no-repeat;
+    background-size: 24px;
+}
+
+.tooltip {
     z-index: 2;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 0;
-    box-shadow: 0 0 0 300vw fade(black, 50%);
-    animation: fadeIn 0.3s ease;
-
-    &::before {
-        position: fixed;
-        content: '';
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-    }
-}
-
-.howto {
     position: fixed;
-    z-index: 2;
+    text-align: left;
     font-size: 18px;
     font-weight: 400;
-    padding: 20px 20px 0;
-    width: 260px;
-    left: 100vw;
+    padding: 20px;
+    width: 300px;
     background: @links-color;
     color: white;
     box-shadow: 4px 4px fade(@text-color, 10%);
     border-radius: 10px;
-    transition: left 0.3s ease, top 0.3s ease;
-    animation: fadeIn 0.3s ease;
+    border: none;
+    opacity: 0;
+    transform: scale(0.001);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+
+    &.tooltip--footer {
+        bottom: 70px;
+        left: ~"calc(50vw - 150px)";
+    }
+	
+	&.tooltip--header {
+        bottom: 70px;
+        left: ~"calc(50vw - 250px)";
+    }
 
     &::before {
         content: '';
@@ -550,33 +555,29 @@ body {
         display: none;
     }
 
-    p {
+    &.initial {
+        width: 220px;
+        right: 20px;
         text-align: center;
-        margin: 1em 0;
-    }
+        bottom: 80px;
 
-    button {
-        border: 1px solid white;
-        font-size: 13px;
-        border-radius: 4px;
-        background: none;
-        color: white;
-        width: 60px;
-        height: 30px;
-        margin: 0 5px;
-        text-transform: uppercase;
-        outline: none;
-        transition: background 0.3s ease;
-
-        &:hover,
-        &:focus {
-            background: fade(white, 20%);
+        &::before {
+            right: 20px;
+            left: auto;
+            bottom: -30px;
+            top: auto;
+            border-bottom: none;
+            border-top: 30px solid @links-color;
+            border-right: none;
+            border-left: 20px solid transparent;
+            box-shadow: 7px 1px 0 -3px fade(@text-color, 10%);
+            transform: skewX(10deg);
         }
     }
 }
 
 .first-visit {
-    .tooltip {
+    .initial {
         opacity: 1;
         transform: none;
     }
@@ -586,6 +587,14 @@ body {
         color: @links-color;
         animation: pointOfInterest 1s ease infinite;
     }
+}
+
+.mobile-only {
+    display: none;
+}
+
+.firefox-only {
+    display: none;
 }
 
 header {
@@ -683,8 +692,14 @@ header {
     margin: 0 5px;
     transition: opacity 0.3s ease, background 0.2s ease, transform 0.3s ease;
 
-    &:hover {
+    &:focus {
         opacity: 0.8;
+
+        & + .tooltip {
+            opacity: 1;
+            transform: none;
+            pointer-events: auto;
+        }
     }
 
     &:active {
@@ -706,7 +721,12 @@ header {
     }
 
     .track--chant {
-        pointer-events: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        cursor: default;
+        color: #999;
     }
 }
 
@@ -718,6 +738,7 @@ header {
 
 .header--controls-help,
 .footer--controls-help {
+    outline: none;
     background: url(../images/help.svg) center no-repeat;
     background-size: 24px;
     transition: opacity 0.3s ease, background 0.2s ease, transform 0.3s ease, box-shadow 0.3s ease;
@@ -822,7 +843,8 @@ header {
 
 .header--controls-loop,
 .footer--controls-loop,
-.header--controls-keyboard {
+.header--controls-keyboard,
+.footer--controls-keyboard {
     margin: 0 5px;
 
     input {
@@ -852,7 +874,8 @@ header {
     }
 }
 
-.header--controls-keyboard input + span {
+.header--controls-keyboard input + span,
+.footer--controls-keyboard input + span {
     background: url(../images/keyboard.svg);
     background-size: 100%;
 }
@@ -1012,6 +1035,10 @@ main {
 
     &.muted {
         opacity: 0.5;
+
+        span.track--chant-current::before {
+            background: none;
+        }
     }
 
     &.left {
@@ -1024,15 +1051,13 @@ main {
         transform: skewX(60deg) translateX(200vw) scaleX(1.5);
     }
 
+    &.current {
+        box-shadow: 0 0 5px fade(@text-color, 10%), 0 2px 2px fade(@text-color, 15%), inset 0 0 0 4px;
+    }
+
     &.expanded {
         .track--more {
             transform: rotateZ(180deg);
-        }
-
-        .track--aside-more {
-            transform: translate3d(0, -300px, 0);
-            visibility: visible;
-            transition: transform 0.5s ease, visibility 0.3s ease;
         }
     }
 
@@ -1043,7 +1068,8 @@ main {
             background: @electric-guitar;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/electric-guitar.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1056,7 +1082,8 @@ main {
             background: @acoustic-guitar;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/acoustic-guitar.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1069,7 +1096,8 @@ main {
             background: @bass-guitar;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/bass-guitar.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1082,7 +1110,8 @@ main {
             background: @harmonics;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/harmonics.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1095,7 +1124,8 @@ main {
             background: @ebow;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/ebow.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1108,7 +1138,8 @@ main {
             background: @piano;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/piano.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1121,7 +1152,8 @@ main {
             background: @rhodes;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/rhodes.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1134,7 +1166,8 @@ main {
             background: @synthesizer;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/synthesizer.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1147,7 +1180,8 @@ main {
             background: @organ;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/organ.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1160,7 +1194,8 @@ main {
             background: @hammond;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/hammond.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1173,7 +1208,8 @@ main {
             background: @violin;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/violin.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1186,7 +1222,8 @@ main {
             background: @cello;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/cello.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1199,7 +1236,8 @@ main {
             background: @double-bass;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/double-bass.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1212,7 +1250,8 @@ main {
             background: @harmonica;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/harmonica.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1225,7 +1264,8 @@ main {
             background: @flute;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/ocarina.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1238,7 +1278,8 @@ main {
             background: @chimes;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/chimes.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1251,7 +1292,8 @@ main {
             background: @bell;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/bell.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1264,7 +1306,8 @@ main {
             background: @saxophone;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/saxophone.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1277,7 +1320,8 @@ main {
             background: @steel-tongue-drum;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/steel-tongue-drum.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1290,7 +1334,8 @@ main {
             background: @drums;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/drums.svg) center no-repeat;
             background-size: 100%;
         }
@@ -1303,10 +1348,22 @@ main {
             background: @waterplea;
         }
 
-        .track--instrument select + span {
+        .track--instrument select + span,
+        .track--help-instrument::before {
             background: url(../images/waterplea.svg) center no-repeat;
             background-size: 100%;
         }
+    }
+
+    .header--controls-help {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        outline: none;
+        width: 20px;
+        height: 20px;
+        background-size: 16px;
+        margin: 0;
     }
 }
 
@@ -1324,12 +1381,99 @@ main {
     overflow-y: auto;
     overflow-x: hidden;
     white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
     transition: max-height 0.3s ease;
 
-    &:empty::before {
+    &[contenteditable=true] span.track--chant-current::before {
+        background: none;
+    }
+
+    &:empty::after {
         content: attr(data-placeholder);
         opacity: 0.5;
     }
+
+    &:nth-child(2) {
+        font-family: inherit;
+        white-space: normal;
+        font-size: inherit;
+    }
+}
+
+.track--help-instrument,
+.track--help-volume,
+.track--help-panning,
+.track--help-octave,
+.track--help-effects,
+.track--help-lock,
+.track--help-key,
+.track--help-accidentals,
+.track--help-solo {
+    line-height: 30px;
+    margin: 10px 0;
+    text-indent: -54px;
+    padding-left: 52px;
+
+    &::before {
+        content: '';
+        display: inline-block;
+        vertical-align: middle;
+        width: 30px;
+        height: 30px;
+        opacity: .7;
+    }
+}
+
+.track--help {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: url(../images/help.svg);
+    background-size: 16px;
+    opacity: .7;
+}
+
+.track--help-volume::before {
+    background: url(../images/volume.svg) no-repeat center;
+    background-size: 16px;
+}
+
+.track--help-panning::before {
+    background: url(../images/stereo.svg) no-repeat center;
+    background-size: 16px;
+}
+
+.track--help-octave::before {
+    background: url(../images/octave.svg) no-repeat center;
+    background-size: 24px;
+}
+
+.track--help-effects::before {
+    background: url(../images/effects.svg) no-repeat center;
+    background-size: 24px;
+}
+
+.track--help-lock::before {
+    background: url(../images/locked.svg) no-repeat center;
+    background-size: 16px;
+}
+
+.track--help-key::before {
+    width: 30px;
+    background: url(../images/key.svg) no-repeat center;
+    background-size: 24px;
+}
+
+.track--help-accidentals::before {
+    width: 30px;
+    background: url(../images/keys.svg) no-repeat center;
+    background-size: 24px;
+}
+
+.track--help-solo::before {
+    background: url(../images/solo.svg) no-repeat center;
+    background-size: 24px;
 }
 
 .track--chant-before {
@@ -1366,6 +1510,7 @@ main {
     width: 340px;
     font-size: 0;
     position: relative;
+    opacity: 0.9999;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -1373,24 +1518,24 @@ main {
     padding: 20px;
     box-shadow: 1px 1px 10px fade(black, 10%);
     overflow: hidden;
-    transition: background 0.3s ease;
-}
+    transition: color 0.3s ease;
 
-.track--aside-more {
-    display: flex;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    align-items: center;
-    position: absolute;
-    background: currentColor;
-    width: 100%;
-    height: 100%;
-    top: 300px;
-    left: 0;
-    padding: 20px;
-    visibility: hidden;
-    box-shadow: 0 0 75px 75px;
-    transition: transform 0.4s ease, visibility 0.3s ease;
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: fade(black, 10%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        animation: loading 1s infinite ease;
+    }
+
+    &.track--aside-loading::before {
+        opacity: 1;
+    }
 }
 
 .track--instrument,
@@ -1463,31 +1608,42 @@ main {
     }
 }
 
-.track--instrument {
-    order: 1;
+.track--octave,
+.track--volume,
+.track--effects,
+.track--panning {
+    input[type=checkbox] {
+        pointer-events: auto;
+    }
+
+    input {
+        pointer-events: none;
+        transition: border-bottom 0.3s ease, background 0.3s ease, opacity 0.3s ease, pointer-events 0s 0.1s;
+    }
+
+    &:hover input {
+        pointer-events: auto;
+    }
 }
 
 .track--key {
-    order: 3;
-    margin: 0 15px;
-
     &::before {
         background: url(../images/key.svg);
         background-size: 100%;
     }
 
     select {
-        width: 130px;
+        width: 95px;
         margin-left: -35px;
         padding-left: 35px;
     }
 }
 
 .track--keys {
-    order: 4;
     border: none;
     opacity: 0.7;
     vertical-align: middle;
+    margin: 12px 8px;
     width: 30px;
     height: 20px;
     background: url(../images/keys.svg) center no-repeat;
@@ -1532,23 +1688,24 @@ main {
 }
 
 .track--lock {
-    order: 1;
     color: @text-color;
     font-size: 16px;
     line-height: 45px;
-    margin: 0;
+    margin: 0 -6px 0 11px;
     display: inline-block;
+    vertical-align: middle;
 
     input + span {
-        width: 100%;
         text-indent: 30px;
-        background: url(../images/check-empty.svg) no-repeat left center;
-        background-size: 24px;
+        background: url(../images/unlocked.svg) no-repeat left;
+        width: 16px;
+        background-size: 16px;
+        margin: 0 9px;
     }
 
     input:checked + span {
-        background: url(../images/check-black.svg) no-repeat left center;
-        background-size: 24px;
+        background: url(../images/locked.svg) no-repeat left;
+        background-size: 16px;
     }
 }
 
@@ -1587,17 +1744,17 @@ main {
 }
 
 .track--octave {
-    order: 2;
-    margin-right: 10px;
+    margin: 0 10px 0 20px;
 
     input + span {
         background: url(../images/octave.svg) no-repeat center;
         background-size: 100%;
+        margin: 0 10px 0 -5px;
     }
 
     input {
-        padding: 5px 5px 5px 50px;
-        width: 95px;
+        padding: 5px 5px 5px 40px;
+        width: 85px;
     }
 }
 
@@ -1619,7 +1776,6 @@ main {
         width: 60px;
         vertical-align: middle;
         border: none;
-        transition: color 0.3s ease;
 
         &:hover,
         &:focus {
@@ -1632,21 +1788,12 @@ main {
     }
 }
 
-.track--volume {
-    order: 3;
-}
-
-.track--effects {
-    order: 2;
-}
-
 .track--volume::before,
 .track--effects::before {
     display: none;
 }
 
 .track--panning {
-    order: 4;
     margin-left: 20px;
 
     input[type=range] {
@@ -1672,7 +1819,7 @@ main {
 
 .track--more,
 .track--solo {
-    order: 6;
+    z-index: 2;
     display: inline-block;
     vertical-align: middle;
     border: none;
@@ -1687,8 +1834,7 @@ main {
 }
 
 .track--solo {
-    order: 5;
-    margin: auto 0 0 auto;
+    margin: 5px 0;
     background: url(../images/solo.svg) center no-repeat;
     background-size: 24px;
     transition: opacity 0.3s ease, background 0.2s ease, transform 0.3s ease;
@@ -1738,6 +1884,9 @@ footer {
         background: url(../images/settings.svg) center no-repeat;
         background-size: 24px;
         margin: 0 auto 0 0;
+        -webkit-tap-highlight-color: rgba(255, 255, 255, 0) !important;
+        -webkit-focus-ring-color: rgba(255, 255, 255, 0) !important;
+        outline: none !important;
     }
 
     .footer--controls-help {
@@ -1746,7 +1895,9 @@ footer {
 }
 
 .accidentals--piano {
-    font-size: 1px;
+    font-size: 0.1vh;
+    max-width: 720em;
+    justify-content: center;
     position: relative;
     margin: -220em auto 80em;
     min-height: 500em;
@@ -1769,7 +1920,7 @@ footer {
         right: 6em;
         bottom: 0;
         transform: translateZ(-76em);
-        box-shadow: 0 0 40em fade(#444, 40%), 0 500em white;
+        box-shadow: 0 0 40em fade(#444, 40%), 0 100em white;
     }
 
     &::after {
@@ -2040,6 +2191,10 @@ footer {
     text-align: justify;
     line-height: 30px;
 
+    & > * {
+        flex-shrink: 0;
+    }
+
     &.accidentals {
         animation: fadeIn 0.6s ease 0.6s;
         animation-fill-mode: backwards;
@@ -2048,6 +2203,18 @@ footer {
     h1 {
         text-align: left;
     }
+}
+
+.popup--help-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.popup--help-content {
+    position: absolute;
+    top: 80px;
+    right: 40px;
 }
 
 .popup--compositions {
@@ -2120,6 +2287,11 @@ footer {
     &:active {
         opacity: 0.7;
     }
+
+    &:disabled {
+        pointer-events: none;
+        opacity: 0.3;
+    }
 }
 
 .popup--github {
@@ -2133,10 +2305,6 @@ footer {
     &:hover {
         box-shadow: inset 0 0 0 50px fade(white, 20%);
     }
-}
-
-.help--mobile-only {
-    display: none;
 }
 
 .popup--author {
@@ -2371,6 +2539,8 @@ footer {
     justify-content: space-around;
     min-height: 100px;
     margin-bottom: 20px;
+    z-index: 1;
+    opacity: 0.9999;
 }
 
 .accidentals--step {
@@ -2494,7 +2664,6 @@ footer {
     border: none;
     background: currentColor;
     opacity: 0.8;
-    transition: background 0.3s ease;
 
     &:hover {
         background: black;
@@ -2538,6 +2707,10 @@ input[type=range] {
         }
     }
 
+    .firefox-only {
+        display: inline-block;
+    }
+
     .main--button-add {
         margin-bottom: 0;
     }
@@ -2578,58 +2751,85 @@ input[type=range] {
     }
 }
 
+@progress-size: 0.5px;
 .progress {
     position: fixed;
-    width: 280px;
-    height: 20px;
-    z-index: 2;
-    top: 50vh;
-    left: ~"calc(50vw - 140px)";
-    background: white;
-    box-shadow: inset 1px 1px 3px fade(@text-color, 50%);
-    border-radius: 3px;
+    bottom: 70px;
+    right: 70px;
+    display: inline-block;
+    vertical-align: middle;
+    box-sizing: border-box;
+    width: 200 * @progress-size;
+    height: 200 * @progress-size;
+    line-height: 160 * @progress-size;
+    font-size: 14px;
+    text-align: center;
+    border-radius: 100%;
+    background: linear-gradient(304deg, #a24bcf, #4b79cf, #65c7ff, #fff397) top -20 * @progress-size left -20 * @progress-size;
+    background-size: 200 * @progress-size 200 * @progress-size;
+    border: 20 * @progress-size solid transparent;
     animation: fadeIn 0.3s ease;
-    transition: opacity 0.3s ease;
+    box-shadow: inset 0 0 0 200 * @progress-size whitesmoke, 2px 2px 8px fade(black, 20%);
 
     &[data-progress="false"] {
         display: none;
     }
 
-    &.closing {
-        opacity: 0;
-    }
-
-    &::before {
-        content: attr(data-text);
-        position: fixed;
-        text-align: center;
-        line-height: 90vh;
-        font-size: 20px;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: fade(white, 95%);
-        z-index: -1;
+    &::before,
+    &::after {
+        transform: rotate(-45deg);
+        content: '';
+        position: absolute;
+        box-sizing: border-box;
+        top: -20 * @progress-size;
+        left: -20 * @progress-size;
+        right: -20 * @progress-size;
+        bottom: -20 * @progress-size;
+        border-top: 21 * @progress-size solid white;
+        border-left: 21 * @progress-size solid white;
+        border-right: 21 * @progress-size solid transparent;
+        border-bottom: 21 * @progress-size solid transparent;
+        border-radius: 100%;
     }
 
     &::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        right: 100%;
-        background: @logo-gradient right;
-        background-size: 280px 20px;
-        border-radius: 3px;
-        transition: right 0.3s ease;
+        transform: rotate(180deg);
     }
 
     @i: 0;
+    @increment: 180deg / 50;
     .loop (@i) when (@i <= 100) {
-        &[data-progress="@{i}"]::after {
-            right: 100% - @i;
+        & when (@i <= 50) {
+            &[data-progress="@{i}"]::after {
+                transform: rotate(135deg + @increment * @i);
+            }
+        }
+        & when (@i > 50) {
+            &[data-progress="@{i}"] {
+                color: transparent;
+            }
+            &[data-progress="@{i}"]::before {
+                transform: rotate(135deg + @increment * @i);
+            }
+            &[data-progress="@{i}"]::after {
+                color: @text-color;
+                content: attr(data-text);
+                transform: none;
+                border: none;
+                background: linear-gradient(304deg, #a24bcf, #4b79cf, #65c7ff, #fff397) right 180 * @progress-size top -20 * @progress-size;
+                width: 100 * @progress-size;
+                left: 80 * @progress-size;
+                line-height: 160 * @progress-size;
+                font-size: 14px;
+                text-align: center;
+                text-indent: -80 * @progress-size;
+                border-radius: 0 200 * @progress-size 200 * @progress-size 0;
+                border-top: 20 * @progress-size solid transparent;
+                border-right: 20 * @progress-size solid transparent;
+                border-bottom: 20 * @progress-size solid transparent;
+                box-shadow: inset 0 0 0 100 * @progress-size whitesmoke;
+                background-size: 220 * @progress-size 220 * @progress-size;
+            }
         }
         .loop(@i + 1);
     }
@@ -2637,6 +2837,22 @@ input[type=range] {
 }
 
 @media only screen and (max-width: 979px) {
+
+    .main--track .header--controls-help {
+        top: auto;
+        left: auto;
+        bottom: 5px;
+        right: 5px;
+    }
+
+    .track--help-panning::before {
+        background: url(../images/headphones.svg) no-repeat center;
+        background-size: 16px;
+    }
+
+    .progress {
+        right: 20px;
+    }
 
     .desktop-only {
         display: none;
@@ -2740,7 +2956,7 @@ input[type=range] {
         margin-bottom: -3px;
     }
 
-    .help--mobile-only {
+    .mobile-only {
         display: block;
     }
 
@@ -2809,24 +3025,6 @@ input[type=range] {
         width: 24px;
     }
 
-    .track--lock {
-        font-size: 0;
-        margin: 0;
-
-        input + span {
-            text-indent: 30px;
-            background: url(../images/unlocked.svg) no-repeat left;
-            width: 16px;
-            background-size: 16px;
-            margin: 0 9px;
-        }
-
-        input:checked + span {
-            background: url(../images/locked.svg) no-repeat left;
-            background-size: 16px;
-        }
-    }
-
     .track--panning {
         margin: 0;
 
@@ -2836,12 +3034,6 @@ input[type=range] {
         }
     }
 
-    .help--button.panning {
-        background: url(../images/headphones.svg) center no-repeat;
-        background-size: 16px;
-    }
-
-    .help--button.download,
     .nav--button.download::before {
         background: url(../images/download-mobile.svg) center no-repeat;
         background-size: 22px;
@@ -2855,8 +3047,7 @@ input[type=range] {
 
     .track--octave {
         width: 45px;
-        margin-right: 12px;
-        order: 2;
+        margin: 0 12px 0 0;
         border-radius: 3px;
         padding: 5px;
         max-height: 40px;
@@ -2945,13 +3136,12 @@ input[type=range] {
     }
 
     .track--keys {
-        order: 4;
         margin: 12px 0;
         width: 19px;
     }
 
     .track--lock {
-        order: 5;
+        margin-left: 0;
     }
 
     .track--more {
@@ -2961,15 +3151,6 @@ input[type=range] {
         right: 5px;
         background: url(../images/down-chevron.svg) center no-repeat;
         background-size: 50%;
-    }
-
-    .track--aside-more,
-    .main--track.expanded .track--aside-more {
-        display: inline;
-        position: static;
-        visibility: visible;
-        box-shadow: none;
-        padding: 0;
     }
 
     .footer--mobile {
@@ -2987,6 +3168,10 @@ input[type=range] {
 
             .footer--controls.additional {
                 opacity: 1;
+            }
+
+            .footer--controls-settings {
+                transform: rotate(180deg);
             }
         }
     }
@@ -3014,6 +3199,21 @@ input[type=range] {
 
         &::after {
             top: -60px;
+        }
+    }
+
+    .popup--help-button {
+        position: fixed;
+        top: 10px;
+        right: 12px;
+    }
+
+    .popup--help-content.right {
+        position: fixed;
+        right: 10px;
+
+        &::before {
+            right: 40px;
         }
     }
 
@@ -3083,18 +3283,21 @@ input[type=range] {
     }
 
     .tooltip {
-        z-index: 2;
-        right: 50px;
-        width: auto;
-        bottom: auto;
-        top: 100px;
+        width: 500px;
 
-        &::before {
-            top: -30px;
+        &.initial {
+            right: 50px;
+            width: auto;
             bottom: auto;
-            transform: skewX(-10deg);
-            border-bottom: 30px solid @links-color;
-            border-top: none;
+            top: 100px;
+
+            &::before {
+                top: -30px;
+                bottom: auto;
+                transform: skewX(-10deg);
+                border-bottom: 30px solid @links-color;
+                border-top: none;
+            }
         }
     }
 
@@ -3133,6 +3336,19 @@ input[type=range] {
 
 @media only screen and (min-width: 980px) {
 
+    .tooltip {
+        &.tooltip--header {
+            bottom: auto;
+            top: 120px;
+
+            &::before {
+                border-bottom: 30px solid @links-color;
+                border-top: none;
+                bottom: 100%;
+            }
+        }
+    }
+
     header {
         justify-content: space-between;
     }
@@ -3153,7 +3369,7 @@ input[type=range] {
         padding-left: 210px;
     }
 
-    .tooltip {
+    .tooltip.initial {
         top: 116px;
     }
 
@@ -3170,8 +3386,12 @@ input[type=range] {
         max-height: 200px;
     }
 
-    .main--track.current {
-        box-shadow: 0 0 5px fade(@text-color, 10%), 0 2px 2px fade(@text-color, 15%), inset 0 0 0 4px;
+    .track--more {
+        display: none;
+    }
+
+    .track--dry {
+        margin: 0 0 0 -3px;
     }
 
     ::-webkit-scrollbar {
@@ -3315,9 +3535,13 @@ input[type=range] {
     }
 }
 
-@media only screen and (min-width: 559px) and (max-width: 979px) {
+@media only screen and (min-width: 553px) and (max-width: 979px) {
     .main--track.expanded .track--aside {
         max-height: 45px;
+    }
+
+    .main--track.expanded .track--chant {
+        max-height: 155px;
     }
 
     .track--more {

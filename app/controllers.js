@@ -4,7 +4,7 @@
 
     app.controller('chantController', ['$scope', '$timeout', 'chantService', function($scope, $timeout, chantService) {
 
-        var howto;
+        var hasPlayed, undoTimer, removedIndex, titleBackup, originalHeight;
 
         if (!chantService.init(init)) {
             $scope.notSupported = true;
@@ -15,11 +15,11 @@
             isPlaying: false,
             isCopySupported: document.queryCommandSupported('copy'),
             isFirstVisit: false,
-            isMenuVisible: false,
-            isLoading: false
+            isMenuVisible: false
         };
 
         $scope.buttons = {
+            play: function() { $scope.state.isPlaying ? stop() : play() },
             share: shareButton,
             clear: clearButton,
             featured: function() { showPopup('featured', chantService.getFeaturedCompositions()) },
@@ -68,17 +68,10 @@
                 $scope.tracks[index].removed = (data.direction ? data.direction : 'left');
                 $timeout(function() { $scope.tracks.splice(index, 1); }, 500);
             }
+
+            removedIndex = index;
+            undo($scope.translate('ui.removed'), undoRemove, $scope.tracks[index], function() { removedIndex = null; });
             $scope.$apply();
-        });
-
-        $scope.$on('loadingStart', function () {
-            $scope.state.isLoading = true;
-        });
-
-        $scope.$on('loadingEnd', function () {
-            $timeout(function() {
-                $scope.state.isLoading = false;
-            });
         });
 
         $scope.$on('accidentals', function (event, track) {
@@ -125,6 +118,20 @@
             }
         });
 
+        $scope.$on('charPressed', function (event, data) {
+            if ($scope.settings.keyboard) {
+                chantService.playChar(data, $scope.lastTrack, $scope.settings);
+            }
+        });
+
+        $scope.validateTitle = function() {
+            if (!$scope.settings.title && titleBackup) {
+                $scope.settings.title = titleBackup;
+            } else {
+                titleBackup = $scope.settings.title;
+            }
+        };
+
         $scope.translate = function(string) {
             return chantService.translate(string);
         };
@@ -138,12 +145,6 @@
             $timeout(function() {
                 $scope.dialog = null;
             }, 300);
-        };
-
-        $scope.help = function(event) {
-            if (howto) howto.unhowtofy();
-            howto = howtofy('.howto-trigger');
-            howto.trigger();
         };
 
         $scope.addTrack = function() {
@@ -185,7 +186,7 @@
             };
 
             if (isComposition) {
-                share.url = window.location.origin + window.location.pathname + '?c=' + $scope.popup.data;
+                share.url = $scope.popup.data;
                 share.title = $scope.settings.title || document.querySelector('meta[property="og:title"]').getAttribute('content');
             }
 
@@ -250,57 +251,36 @@
 
         $scope.saveComposition = function(title) {
             if (chantService.doesCompositionExist(title)) {
-                $scope.dialog = {
-                    title: chantService.translate('dialog.confirm'),
-                    text: chantService.translate('dialog.overwrite'),
-                    data: title,
-                    callback: function() {
-                        doSaveComposition(title);
-                    }
-                };
+                doSaveComposition(title);
+                undo($scope.translate('popup.overwritten'), undoComposition);
             } else {
                 doSaveComposition(title)
             }
         };
 
         $scope.loadComposition = function(title) {
-            $scope.state.isLoading = true;
-            var composition = chantService.load(title, function() {
-                $timeout(function() {
-                    $scope.state.isLoading = false
-                });
-            });
+            var composition = chantService.load(title);
             $scope.settings = composition.settings;
             $scope.tracks = composition.tracks;
             $scope.closePopups();
         };
 
         $scope.removeComposition = function(composition) {
-            $scope.dialog = {
-                title: chantService.translate('dialog.confirm'),
-                text: chantService.translate('dialog.remove'),
-                data: composition.title,
-                callback: function() {
-                    var index = $scope.popup.data.indexOf(composition);
-                    $scope.popup.data.splice(index, 1);
-                    chantService.remove(composition.title);
-                }
-            };
+            var index = $scope.popup.data.indexOf(composition);
+            $scope.popup.data.splice(index, 1);
+            chantService.remove(composition.title);
+
+            undo($scope.translate('popup.removed'), undoComposition);
         };
 
         $scope.loadFeatured = function(index) {
-            $scope.state.isLoading = true;
-            var composition = chantService.parseLink(chantService.getFeaturedCompositions()[index].content, function() {
-                $timeout(function() {
-                    $scope.state.isLoading = false
-                });
-            });
+            var composition = chantService.parseLink(chantService.getFeaturedCompositions()[index].content);
             $scope.settings = composition.settings;
             $scope.tracks = composition.tracks;
             $scope.closePopups();
 
-            if ($scope.settings.splashscreen && $scope.settings.title) {
-                $timeout(function() { $scope.splashscreen = $scope.settings; }, 400);
+            if ($scope.settings.splashscreen) {
+                $timeout(function() { showPopup('splashscreen'); }, 400);
             }
         };
 
@@ -363,21 +343,29 @@
             chantService.playStep(step, track);
         };
 
-        $scope.play = function() {
-            if (!$scope.settings.tempo || !$scope.tracks.length) return;
+        $scope.wakeSafari = function() {
+            chantService.playStep(1, $scope.settings, true);
+        };
+
+        function play() {
+            $scope.wakeSafari();
+            if (!$scope.tracks.length) return;
+
+            if (!$scope.settings.tempo) $scope.settings.tempo = 90;
 
             for (var i = 0; i < $scope.tracks.length; i++) {
                 $scope.tracks[i].finished = false;
             }
 
             $scope.state.isPlaying = true;
+            hasPlayed = true;
 
-            chantService.play($scope.settings, $scope.tracks, $scope.stop, function() {
+            chantService.play($scope.settings, $scope.tracks, stop, function() {
                 $scope.$apply();
             });
-        };
+        }
 
-        $scope.stop = function() {
+        function stop() {
             chantService.stop();
 
             $scope.state.isPlaying = false;
@@ -386,7 +374,7 @@
                 $scope.tracks[i].newWord = true;
                 $scope.tracks[i].finished = true;
             }
-        };
+        }
 
         function init() {
             window.addEventListener('resize', onResize);
@@ -396,11 +384,14 @@
                 $scope.state.isMenuVisible = false;
                 $scope.$apply()
             });
-
+			
+            //TODO: Update help
             if (chantService.isFirstVisit()) {
                 $scope.state.isFirstVisit = true;
                 document.addEventListener('click', firstVisitClick);
                 document.addEventListener('touchstart', firstVisitClick);
+                document.querySelector('.header--controls-help').addEventListener('mouseenter', firstVisitClick);
+                document.querySelector('.footer--controls-help').addEventListener('mouseenter', firstVisitClick);
             }
 
             document.getElementById('tempo').addEventListener('wheel', onWheel);
@@ -421,27 +412,65 @@
 
             if (window.location.search) {
                 var composition = window.location.search.substr(3, window.location.search.length);
-                $scope.state.isLoading = true;
-                composition = chantService.parseLink(decodeURIComponent(composition), function() {
-                    $timeout(function() {
-                        $scope.state.isLoading = false
-                    });
-                });
+                composition = chantService.parseLink(decodeURIComponent(composition));
                 $scope.settings = composition.settings;
                 $scope.tracks = composition.tracks;
-                if ($scope.settings.splashscreen && $scope.settings.title) {
-                    $scope.splashscreen = $scope.settings;
+                if ($scope.settings.splashscreen) {
+                    $timeout(function() { showPopup('splashscreen'); }, 400);
                 }
-                $scope.$apply();
             } else {
                 $scope.addTrack();
-                $scope.state.isLoading = true;
-                chantService.loadSamples($scope.tracks[0].instrument, function() {
-                    $timeout(function() {
-                        $scope.state.isLoading = false;
-                    });
-                });
             }
+
+            $scope.lastTrack = $scope.tracks[0];
+            $scope.$apply();
+        }
+
+        function clearButton() {
+            undo($scope.translate('ui.cleared'), undoClear, $scope.tracks);
+
+            $scope.tracks = [];
+            $scope.addTrack();
+        }
+
+        function undo(text, func, data, expireCallback) {
+            $scope.undo = {
+                data: data,
+                text: text,
+                func: func
+            };
+
+            if (document.querySelector('.undo')) document.querySelector('.undo').classList.remove('closing');
+            clearTimeout(undoTimer);
+            undoTimer = setTimeout(function() {
+                document.querySelector('.undo').classList.add('closing');
+                undoTimer = setTimeout(function() {
+                    if (expireCallback) expireCallback();
+                    $scope.undo = null;
+                    $scope.$apply();
+                }, 300);
+            }, 5000);
+        }
+
+        function undoRemove() {
+            clearTimeout(undoTimer);
+            $scope.undo.data.removed = '';
+            $scope.tracks.splice(removedIndex, 0, $scope.undo.data);
+            $scope.undo = null;
+            removedIndex = null;
+        }
+
+        function undoClear() {
+            $scope.tracks = $scope.undo.data;
+            $scope.undo = null;
+        }
+
+        function undoComposition() {
+            clearTimeout(undoTimer);
+            $scope.undo = null;
+            chantService.undo();
+
+            if ($scope.popup) $scope.popup.data = chantService.getSavedCompositions();
         }
 
         function scrollTo(element, to, duration) {
@@ -460,6 +489,8 @@
             $scope.state.isFirstVisit = false;
             document.removeEventListener('click', firstVisitClick);
             document.removeEventListener('touchstart', firstVisitClick);
+                document.querySelector('.header--controls-help').removeEventListener('mouseenter', firstVisitClick);
+                document.querySelector('.footer--controls-help').removeEventListener('mouseenter', firstVisitClick);
             $scope.$apply();
         }
 
@@ -469,7 +500,7 @@
                 if ($scope.popup) $scope.closePopups();
             }
 
-            if ($scope.settings.keyboard) {
+            if ($scope.settings.keyboard && !document.activeElement.classList.contains('track--chant')) {
                 var key;
                 switch (event.which) {
                     case 67:
@@ -497,7 +528,7 @@
                         key = ' ';
                         break;
                 }
-                if (event.shiftKey) key = key.toUpperCase();
+                if (event.shiftKey && key) key = key.toUpperCase();
                 chantService.playChar(key, $scope.lastTrack, $scope.settings);
             }
         }
@@ -544,17 +575,8 @@
             showPopup('share', link);
         }
 
-        function clearButton() {
-            $scope.dialog = {
-                title: chantService.translate('dialog.confirm'),
-                text: chantService.translate('dialog.clear'),
-                callback: function() {
-                    doClearComposition();
-                }
-            };
-        }
-
         function saveButton() {
+            titleBackup = $scope.settings.title;
             showPopup('save', chantService.getSavedCompositions());
             $timeout(function() {
                 document.getElementById('save-name').focus();
@@ -566,7 +588,9 @@
         }
 
         function downloadButton() {
-            if (!chantService.download($scope.settings.title)) {
+            if (hasPlayed) {
+                chantService.download($scope.settings.title);
+            } else {
                 $scope.dialog = {
                     title: chantService.translate('dialog.note'),
                     text: chantService.translate('dialog.download')
@@ -585,6 +609,7 @@
         }
 
         function doSaveComposition(title) {
+            if (!title) return;
             try {
                 chantService.save(title, $scope.settings, $scope.tracks);
                 $scope.settings.title = title;
@@ -596,11 +621,6 @@
                 };
                 $scope.$apply();
             }
-        }
-
-        function doClearComposition() {
-            $scope.tracks = [];
-            $scope.addTrack();
         }
 
     }]);

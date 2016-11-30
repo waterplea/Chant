@@ -14,3 +14,7 @@
     <label class="popup--input-show"><input type="checkbox" data-ng-model="settings.splashscreen"><span></span>{{::translate('popup.splashscreen')}}</label>
 </div>
 <button type="button" class="popup--button-close" data-ng-click="closePopups()">{{::translate('popup.close')}}</button>
+<button class="header--controls-help popup--help-button" type="button" title="{{::translate('ui.help')}}" tabindex="-1"></button>
+<button class="tooltip  popup--help-content top right" tabindex="-1">
+    <div>{{::translate('help.notestextone')}}</div>
+</button>

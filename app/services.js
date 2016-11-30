@@ -6,17 +6,24 @@
         var bufferLoader,
             title,
             context,
+            detune,
             reverb,
+            delay,
+            distDelay,
+            bassFilter,
+            tremolo,
             master,
             rec,
             metronome,
             encoder,
             dummyTrack,
             featuredCompositions,
-            localization;
+            localization,
+            undoComposition;
         var delayBeats = 1.5;
         var newWord = true;
         var instruments = {};
+        var effects = {};
 
         var lang = (navigator.language || navigator.userLanguage) === 'ru' ? 'ru' : 'en';
 
@@ -53,7 +60,7 @@
             master = context.createGain();
             master.connect(context.destination);
 
-            loadReverb('ErrolBrickworksKiln', callback);
+            loadReverb('StMarysAbbeyReconstructionPhase3', callback);
 
             rec = new Recorder(master);
 
@@ -70,7 +77,7 @@
                 dry: false,
                 effects: 50,
                 volumeNode: context.createGain(),
-                panNode: context.createStereoPanner()
+                panNode: context.createPanner()
             };
 
             loadJSON('assets/json/featured.json',
@@ -105,31 +112,16 @@
             var newTrack = Object.assign({}, dummyTrack);
 
             newTrack.volumeNode = context.createGain();
-            newTrack.panNode = context.createStereoPanner();
+            newTrack.panNode = context.createPanner();
             newTrack.effectsNode = context.createGain();
             newTrack.dryNode = context.createGain();
 
-            newTrack.delay = context.createDelay(5.0);
-            newTrack.feedback = context.createGain();
-            newTrack.feedback.gain.value = 0.3;
-            newTrack.filter = context.createBiquadFilter();
-            newTrack.filter.frequency.value = 1000;
-            newTrack.reverb = context.createConvolver();
-            newTrack.reverb.buffer = reverb;
-
-            newTrack.delay.connect(newTrack.feedback);
-            newTrack.feedback.connect(newTrack.filter);
-            newTrack.filter.connect(newTrack.delay);
-            newTrack.reverb.connect(newTrack.effectsNode);
-            newTrack.delay.connect(newTrack.effectsNode);
-
             newTrack.volumeNode.connect(newTrack.panNode);
-            newTrack.panNode.connect(newTrack.reverb);
-            newTrack.panNode.connect(newTrack.delay);
             newTrack.panNode.connect(newTrack.dryNode);
+            newTrack.panNode.connect(newTrack.effectsNode);
 
             newTrack.dryNode.connect(master);
-            newTrack.effectsNode.connect(master);
+            newTrack.effectsNode.connect(effects[newTrack.instrument]);
             newTrack.currentLetter = 0;
             newTrack.newWord = true;
 
@@ -140,6 +132,13 @@
             var buffer, currentStep, multiplier;
 
             var finished = true;
+
+            tremolo.gain.exponentialRampToValueAtTime(0.1, context.currentTime + 5 / settings.tempo);
+            tremolo.gain.exponentialRampToValueAtTime(1.0, context.currentTime + 10 / settings.tempo);
+            tremolo.gain.exponentialRampToValueAtTime(0.1, context.currentTime + 15 / settings.tempo);
+            tremolo.gain.exponentialRampToValueAtTime(1.0, context.currentTime + 20 / settings.tempo);
+            tremolo.gain.exponentialRampToValueAtTime(0.1, context.currentTime + 25 / settings.tempo);
+            tremolo.gain.exponentialRampToValueAtTime(1.0, context.currentTime + 30 / settings.tempo);
 
             for (var i = 0; i < tracks.length; i++) {
                 if (!tracks[i].finished) {
@@ -198,9 +197,18 @@
                 if (currentStep && instruments[tracks[i].instrument]) {
                     buffer = instruments[tracks[i].instrument][currentStep - 1];
 
-                    tracks[i].delay.delayTime.value = 60 / settings.tempo * delayBeats;
                     tracks[i].volumeNode.gain.value = tracks[i].volume / 50 * !tracks[i].muted;
-                    tracks[i].panNode.pan.value = tracks[i].panning / 25;
+
+                    var xDeg = tracks[i].panning * 4;
+                    var zDeg = xDeg + 90;
+                    if (zDeg > 90) {
+                        zDeg = 180 - zDeg;
+                    }
+                    var x = Math.sin(xDeg * (Math.PI / 180));
+                    var z = Math.sin(zDeg * (Math.PI / 180));
+
+
+                    tracks[i].panNode.setPosition(x, 0, z);
                     tracks[i].effectsNode.gain.value = tracks[i].effects / 50 * !tracks[i].dry;
                     tracks[i].dryNode.gain.value = 1 - tracks[i].effectsNode.gain.value;
 
@@ -213,12 +221,12 @@
                         source.playbackRate.value = multiplier *
                             settings.key *
                             settings.keys[currentStep - 1] *
-                            Math.pow(2, tracks[i].octave);
+                            Math.pow(2, tracks[i].octave || 0);
                     } else {
                         source.playbackRate.value = multiplier *
                             tracks[i].key *
                             tracks[i].keys[currentStep - 1] *
-                            Math.pow(2, tracks[i].octave);
+                            Math.pow(2, tracks[i].octave || 0);
                     }
 
                     if (tracks[i].newWord) {
@@ -226,7 +234,24 @@
                         tracks[i].newWord = false;
                     }
 
-                    source.start(0);
+                    var startTime = context.currentTime;
+                    if (tracks[i].instrument !== 'synth') {
+                        startTime += 2048 / context.sampleRate;
+                    }
+
+                    if (source.playbackRate.value > 0.5) {
+                        startTime += 0.05;
+                    }
+
+                    if (tracks[i].instrument === 'organ' && tracks[i].effects > 25) {
+                        detune.connect(source.detune);
+                    }
+
+                    source.start(startTime);
+
+                    setTimeout(function() {
+                        source.disconnect();
+                    }, 60000);
                 }
 
                 tracks[i].currentLetter++;
@@ -245,7 +270,7 @@
 
         function loadSamples(instrument, callback) {
             if (instruments[instrument]) {
-                callback();
+				if (callback) callback();
                 return;
             }
             bufferLoader = new BufferLoader(
@@ -261,7 +286,7 @@
                 ],
                 function(data) {
                     instruments[instrument] = data;
-                    callback();
+                    if (callback) callback();
                 }
             );
             bufferLoader.load();
@@ -274,12 +299,361 @@
                     'assets/audio/reverb/' + name + '.m4a'
                 ],
                 function(data) {
-                    reverb = data[0];
+                    initEffects(data[0]);
                     callback();
                 }
             );
 
             bufferLoader.load();
+        }
+
+        function makeDistortionCurve(amount) {
+            var k = typeof amount === 'number' ? amount : 50,
+                n_samples = 44100,
+                curve = new Float32Array(n_samples),
+                deg = Math.PI / 180,
+                i = 0,
+                x;
+            for ( ; i < n_samples; ++i ) {
+                x = i * 2 / n_samples - 1;
+                curve[i] = ( 3 + k ) * x * 20 * deg / ( Math.PI + k * Math.abs(x) );
+            }
+            return curve;
+        }
+
+        function initEffects(response) {
+            effects['acoustic'] = context.createGain();
+            effects['electric'] = context.createGain();
+            effects['electric'].gain.value = 0.5;
+            effects['bass'] = context.createGain();
+            effects['harmonics'] = context.createGain();
+            effects['harmonics'].gain.value = 0.6;
+            effects['ebow'] = context.createGain();
+            effects['ebow'].gain.value = 0.6;
+            effects['piano'] = context.createGain();
+            //effects['rhodes'] = context.createGain();
+            effects['synth'] = context.createGain();
+            effects['organ'] = context.createGain();
+            effects['organ'].gain.value = 0.5;
+            //effects['hammond'] = context.createGain();
+            //effects['violin'] = context.createGain();
+            //effects['cello'] = context.createGain();
+            effects['double'] = context.createGain();
+            effects['harmonica'] = context.createGain();
+            effects['harmonica'].gain.value = 0.5;
+            //effects['flute'] = context.createGain();
+            //effects['chimes'] = context.createGain();
+            //effects['bell'] = context.createGain();
+            //effects['sax'] = context.createGain();
+            effects['tank'] = context.createGain();
+            effects['tank'].gain.value = 0.5;
+            effects['drums'] = context.createGain();
+            effects['waterplea'] = context.createGain();
+
+            /* Oscillators */
+            var osc = context.createOscillator();
+            osc.frequency.value = 5.7;
+            var oscDouble = context.createOscillator();
+            oscDouble.frequency.value = 6.8;
+            osc.start();
+            oscDouble.start();
+
+            /* Universal reverb */
+            reverb = context.createConvolver();
+            reverb.buffer = response;
+            reverb.connect(master);
+            var reverbFeedback = context.createGain();
+
+            /* Universal filtered delay */
+            delay = context.createDelay(5.0);
+            delay.delayTime.value = 1;
+            var feedback = context.createGain();
+            feedback.gain.value = 0.3;
+            var filter = context.createBiquadFilter();
+            filter.frequency.value = 1000;
+            delay.connect(feedback);
+            feedback.connect(filter);
+            filter.connect(delay);
+            delay.connect(master);
+
+            /* Bass filter */
+            var bassFilterFeedback = context.createGain();
+            bassFilterFeedback.gain.value = 0.6;
+            bassFilter = context.createBiquadFilter();
+            bassFilter.frequency.value = 600;
+            bassFilter.Q.value = 20;
+            bassFilter.type = 'lowpass';
+            bassFilter.connect(delay);
+            bassFilterFeedback.connect(bassFilter);
+            var oscBass = context.createOscillator();
+            oscBass.frequency.value = 0.07;
+            var oscBassAmp = context.createGain();
+            oscBassAmp.gain.value = 400;
+            oscBass.connect(oscBassAmp);
+            oscBassAmp.connect(bassFilter.frequency);
+            oscBass.start();
+
+            /* Acoustic filter */
+            reverbFeedback.gain.value = 0.1;
+            reverbFeedback.connect(reverb);
+            var acousticFilterFeedback = context.createGain();
+            acousticFilterFeedback.gain.value = 0.2;
+            acousticFilterFeedback.connect(bassFilter);
+
+            /* Distortion */
+            distDelay = context.createDelay(5.0);
+            distDelay.delayTime.value = .5;
+            distDelay.connect(master);
+            var distFeedback = context.createGain();
+            distFeedback.gain.value = 0.2;
+            var distVolume = context.createGain();
+            distVolume.gain.value = 0.6;
+            var distortion = context.createWaveShaper();
+            distortion.curve = makeDistortionCurve(400);
+            distortion.oversample = '4x';
+            distortion.connect(distVolume);
+            distVolume.connect(master);
+            distortion.connect(distFeedback);
+            distFeedback.connect(distDelay);
+
+            /* Tremolo */
+            tremolo = context.createGain();
+            tremolo.gain.value = 1.0;
+            tremolo.connect(master);
+
+            /* Leslie */
+            var leslie = context.createGain();
+            leslie.gain.value = 1.0;
+            detune = context.createGain();
+            detune.gain.value = 12.0;
+            var leslieLow = context.createBiquadFilter();
+            leslieLow.frequency.value = 500;
+            leslieLow.gain.value = -30;
+            leslieLow.Q.value = 20;
+            leslieLow.type = 'highshelf';
+            var leslieHigh = context.createBiquadFilter();
+            leslieHigh.frequency.value = 500;
+            leslieHigh.gain.value = -30;
+            leslieHigh.Q.value = 20;
+            leslieHigh.type = 'lowshelf';
+            var leslieDistortion = context.createWaveShaper();
+            leslieDistortion.curve = makeDistortionCurve(10);
+            leslieDistortion.oversample = '4x';
+            var leslieLowFeedback = context.createGain();
+            leslieLowFeedback.gain.value = 0.9;
+            var leslieHighFeedback = context.createGain();
+            leslieHighFeedback.gain.value = 0.9;
+            var leslieLowOsc = context.createGain();
+            leslieLowOsc.gain.value = 0.1;
+            var leslieHighOsc = context.createGain();
+            leslieHighOsc.gain.value = 0.1;
+            leslie.connect(leslieDistortion);
+            leslieDistortion.connect(leslieHigh);
+            leslieDistortion.connect(leslieLow);
+            leslieLow.connect(leslieLowFeedback);
+            leslieHigh.connect(leslieHighFeedback);
+            leslieLowFeedback.connect(reverbFeedback);
+            leslieHighFeedback.connect(reverbFeedback);
+            leslieLowFeedback.connect(master);
+            leslieHighFeedback.connect(master);
+            osc.connect(leslieLowOsc);
+            oscDouble.connect(leslieHighOsc);
+            oscDouble.connect(detune);
+            leslieLowOsc.connect(leslieLowFeedback.gain);
+            leslieHighOsc.connect(leslieHighFeedback.gain);
+            
+            /* Wah Wah */
+            var wahwah = context.createGain();
+            var waveshaper = context.createWaveShaper();
+            var awFollower = context.createBiquadFilter();
+            awFollower.type = "lowpass";
+            awFollower.frequency.value = 5.0;
+            var curve = new Float32Array(65536);
+            for (var i=-32768; i<32768; i++)
+                curve[i+32768] = ((i>0)?i:-i)/32768;
+            waveshaper.curve = curve;
+            waveshaper.connect(awFollower);
+            var awDepth = context.createGain();
+            awDepth.gain.value = 11585;
+            awFollower.connect(awDepth);
+            var awFilter = context.createBiquadFilter();
+            awFilter.type = "lowpass";
+            awFilter.Q.value = 15;
+            awFilter.frequency.value = 250;
+            awDepth.connect(awFilter.frequency);
+            awFilter.connect(master);
+            wahwah.connect(waveshaper);
+            wahwah.connect(awFilter);
+
+            /* Stereo flanger */
+            var splitter = context.createChannelSplitter(2);
+            var merger = context.createChannelMerger(2);
+            var flanger = context.createGain();
+            var sfllfb = context.createGain();
+            var sflrfb = context.createGain();
+            var sflspeed = context.createOscillator();
+            var sflldepth = context.createGain();
+            var sflrdepth = context.createGain();
+            var sflldelay = context.createDelay();
+            var sflrdelay = context.createDelay();
+            sfllfb.gain.value = sflrfb.gain.value = 0.9;
+            flanger.connect(splitter);
+            flanger.connect(master);
+            sflldelay.delayTime.value = 0.003;
+            sflrdelay.delayTime.value = 0.003;
+            splitter.connect(sflldelay, 0);
+            splitter.connect(sflrdelay, 1);
+            sflldelay.connect(sfllfb);
+            sflrdelay.connect(sflrfb);
+            sfllfb.connect(sflrdelay);
+            sflrfb.connect(sflldelay);
+            sflldepth.gain.value = 0.005;
+            sflrdepth.gain.value = -0.005;
+            sflspeed.type = 'triangle';
+            sflspeed.frequency.value = 0.15;
+            sflspeed.connect(sflldepth);
+            sflspeed.connect(sflrdepth);
+            sflldepth.connect(sflldelay.delayTime);
+            sflrdepth.connect(sflrdelay.delayTime);
+            sflldelay.connect(merger, 0, 0);
+            sflrdelay.connect(merger, 0, 1);
+            merger.connect(master);
+            sflspeed.start();
+
+            /* Bit Crusher */
+            var bitCrusher = (function() {
+                var node = context.createScriptProcessor(2048, 2, 2);
+                node.bits = 6; // between 1 and 16
+                node.normfreq = 0.2; // between 0.0 and 1.0
+                var step = Math.pow(1/2, node.bits);
+                var phaser = 0;
+                var lastA = 0;
+                var lastB = 0;
+                node.onaudioprocess = function(e) {
+                    var inputA = e.inputBuffer.getChannelData(0);
+                    var inputB = e.inputBuffer.getChannelData(1);
+                    var outputA = e.outputBuffer.getChannelData(0);
+                    var outputB = e.outputBuffer.getChannelData(1);
+                    for (var i = 0; i < inputA.length; i++) {
+                        phaser += node.normfreq;
+                        if (phaser >= 1.0) {
+                            phaser -= 1.0;
+                            lastA = step * Math.floor(inputA[i] / step + 0.5);
+                            lastB = step * Math.floor(inputB[i] / step + 0.5);
+                        }
+                        outputA[i] = lastA;
+                        outputB[i] = lastB;
+                    }
+                };
+                return node;
+            })();
+            bitCrusher.connect(master);
+
+            /* Reverser */
+            var reverser = (function() {
+                var node = context.createScriptProcessor(2048, 2, 2);
+                node.onaudioprocess = function(e) {
+                    var inputA = e.inputBuffer.getChannelData(0);
+                    var inputB = e.inputBuffer.getChannelData(1);
+                    var outputA = e.outputBuffer.getChannelData(0);
+                    var outputB = e.outputBuffer.getChannelData(1);
+                    for (var i = 0; i < inputA.length; i++) {
+                        outputA[i] = 2 * inputA[i] * Math.abs(inputA.length / 2 - i) / inputA.length + 2 * inputA[inputA.length - i - 1] * (inputA.length / 2 - Math.abs(inputA.length / 2 - i)) / inputA.length;
+                        outputB[i] = 2 * inputB[i] * Math.abs(inputA.length / 2 - i) / inputA.length + 2 * inputB[inputA.length - i - 1] * (inputA.length / 2 - Math.abs(inputA.length / 2 - i)) / inputA.length;
+                    }
+                };
+                return node;
+            })();
+
+            var reverserLong = (function() {
+                var node = context.createScriptProcessor(16384, 2, 2);
+                node.onaudioprocess = function(e) {
+                    var inputA = e.inputBuffer.getChannelData(0);
+                    var inputB = e.inputBuffer.getChannelData(1);
+                    var outputA = e.outputBuffer.getChannelData(0);
+                    var outputB = e.outputBuffer.getChannelData(1);
+                    for (var i = 0; i < inputA.length; i++) {
+                        outputA[i] = 2 * inputA[i] * Math.abs(inputA.length / 2 - i) / inputA.length + 2 * inputA[inputA.length - i - 1] * (inputA.length / 2 - Math.abs(inputA.length / 2 - i)) / inputA.length;
+                        outputB[i] = 2 * inputB[i] * Math.abs(inputA.length / 2 - i) / inputA.length + 2 * inputB[inputA.length - i - 1] * (inputA.length / 2 - Math.abs(inputA.length / 2 - i)) / inputA.length;
+                    }
+                };
+                return node;
+            })();
+            reverserLong.connect(master);
+            reverser.connect(reverserLong);
+
+            effects['acoustic'].connect(distFeedback);
+            effects['acoustic'].connect(acousticFilterFeedback);
+            effects['acoustic'].connect(reverbFeedback);
+            effects['acoustic'].connect(master);
+            effects['electric'].connect(reverb);
+            effects['bass'].connect(bassFilterFeedback);
+            effects['bass'].connect(master);
+            //effects['bass'].connect(wahwah);
+            effects['harmonics'].connect(reverbFeedback);
+            effects['harmonics'].connect(delay);
+            effects['harmonics'].connect(reverser);
+            effects['ebow'].connect(bassFilterFeedback);
+            effects['ebow'].connect(reverbFeedback);
+            effects['piano'].connect(flanger);
+            effects['piano'].connect(reverser);
+            effects['piano'].connect(delay);
+            effects['piano'].connect(reverbFeedback);
+            //effects['rhodes'].connect(reverb);
+            //effects['rhodes'].connect(delay);
+            //effects['synth'].connect(reverb);
+            //effects['synth'].connect(highAttenuator);
+            effects['synth'].connect(bitCrusher);
+            effects['organ'].connect(leslie);
+            //effects['organ'].connect(delay);
+            //effects['hammond'].connect(reverb);
+            //effects['hammond'].connect(delay);
+            //effects['violin'].connect(reverb);
+            //effects['violin'].connect(delay);
+            //effects['cello'].connect(reverb);
+            //effects['cello'].connect(delay);
+            effects['double'].connect(wahwah);
+            //effects['double'].connect(master);
+            effects['harmonica'].connect(flanger);
+            effects['harmonica'].connect(distFeedback);
+            effects['harmonica'].connect(leslie);
+            effects['harmonica'].connect(bassFilterFeedback);
+            effects['harmonica'].connect(reverser);
+            effects['harmonica'].connect(reverb);
+            //effects['flute'].connect(reverb);
+            //effects['flute'].connect(delay);
+            //effects['chimes'].connect(reverb);
+            //effects['chimes'].connect(delay);
+            //effects['bell'].connect(reverb);
+            //effects['bell'].connect(delay);
+            //effects['sax'].connect(reverb);
+            //effects['sax'].connect(delay);
+            effects['tank'].connect(reverb);
+            effects['tank'].connect(delay);
+            effects['tank'].connect(reverser);
+            //effects['drums'].connect(reverb);
+            //effects['drums'].connect(delay);
+            effects['drums'].connect(distortion);
+            effects['waterplea'].connect(tremolo);
+            effects['waterplea'].connect(reverbFeedback);
+            //effects['waterplea'].connect(delay);
+        }
+
+        function hannWindow(length) {
+            var window = new Float32Array(length);
+            for (var i = 0; i < length; i++) {
+                window[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / (length - 1)));
+            }
+            return window;
+        }
+
+        function linearInterpolation(a, b, t) {
+            return a + (b - a) * t;
+        }
+
+        function reWire(track) {
+            track.effectsNode.disconnect();
+            track.effectsNode.connect(effects[track.instrument]);
         }
 
         function validate(tracks) {
@@ -330,33 +704,43 @@
         }
 
         function save(title, settings, tracks) {
+            if (localStorage.getItem(c.PREFIX + title)) {
+                undoComposition = {
+                    title: c.PREFIX + title,
+                    composition: localStorage.getItem(c.PREFIX + title)
+                };
+            }
+
             localStorage.setItem(c.PREFIX + title, encodeLink(settings, tracks));
         }
 
-        function load(title, callback) {
-            return parseLink(localStorage.getItem(c.PREFIX + title), callback);
+        function load(title) {
+            return parseLink(localStorage.getItem(c.PREFIX + title));
         }
 
         function remove(title) {
+            undoComposition = {
+                title: c.PREFIX + title,
+                composition: localStorage.getItem(c.PREFIX + title)
+            };
             localStorage.removeItem(c.PREFIX + title);
+        }
+
+        function undo() {
+            localStorage.setItem(undoComposition.title, undoComposition.composition);
+            undoComposition = null;
         }
 
         function download(name) {
             title = name;
             rec.getBuffer(function(data) {
-                if (data[0].length) {
-                    if (localStorage.getItem('hd')) {
-                        rec.exportWAV(downloadWav);
-                    } else {
-                        document.getElementById('progress').setAttribute('data-progress', 0);
-                        downloadMp3(data);
-                    }
+                if (localStorage.getItem('hd')) {
+                    rec.exportWAV(downloadWav);
                 } else {
-                    return false;
+                    document.getElementById('progress').setAttribute('data-progress', 0);
+                    downloadMp3(data);
                 }
             });
-
-            return true;
         }
 
         function downloadWav(blob) {
@@ -409,11 +793,18 @@
 
         function isFirstVisit() {
             var result = localStorage.getItem('visited');
-            localStorage.setItem('visited', 'true');
+
+            try {
+                localStorage.setItem('visited', 'true');
+            }
+            catch(e) {
+                return true;
+            }
+
             return !result;
         }
 
-        function playStep(step, track) {
+        function playStep(step, track, safariInitialize) {
             var buffer;
             var currentStep;
             var multiplier = 1;
@@ -473,10 +864,21 @@
             if (track.instrument) {
                 buffer = instruments[track.instrument][currentStep - 1];
             } else {
-                buffer = instruments['piano'][currentStep - 1];
+				for (var i in instruments) {
+					buffer = instruments[i][currentStep - 1];
+					break;
+				}
             }
 
             var source = context.createBufferSource();
+            if (safariInitialize) {
+                var gain = context.createGain();
+                gain.gain.value = 0;
+                source.connect(gain);
+                gain.connect(master);
+                source.start(0);
+                return;
+            }
             source.buffer = buffer;
             source.connect(master);
 
@@ -486,6 +888,7 @@
 
         function playChar(char, track, settings) {
             if (!track) return;
+
             var currentStep;
             var multiplier = 1;
 
@@ -532,9 +935,20 @@
             if (currentStep) {
                 var buffer = instruments[track.instrument][currentStep - 1];
 
-                track.delay.delayTime.value = 60 / settings.tempo * delayBeats;
+                delay.delayTime.value = 60 / settings.tempo * delayBeats;
+                distDelay.delayTime.value = 30 / settings.tempo * delayBeats;
                 track.volumeNode.gain.value = track.volume / 50;
-                track.panNode.pan.value = track.panning / 25;
+
+                var xDeg = track.panning * 4;
+                var zDeg = xDeg + 90;
+                if (zDeg > 90) {
+                    zDeg = 180 - zDeg;
+                }
+                var x = Math.sin(xDeg * (Math.PI / 180));
+                var z = Math.sin(zDeg * (Math.PI / 180));
+
+
+                track.panNode.setPosition(x, 0, z);
                 track.effectsNode.gain.value = track.effects / 50 * !track.dry;
                 track.dryNode.gain.value = 1 - track.effectsNode.gain.value;
 
@@ -547,12 +961,12 @@
                     source.playbackRate.value = multiplier *
                         settings.key *
                         settings.keys[currentStep - 1] *
-                        Math.pow(2, track.octave);
+                        Math.pow(2, track.octave || 0);
                 } else {
                     source.playbackRate.value = multiplier *
                         track.key *
                         track.keys[currentStep - 1] *
-                        Math.pow(2, track.octave);
+                        Math.pow(2, track.octave || 0);
                 }
 
                 if (newWord) {
@@ -566,12 +980,15 @@
 
         function play(settings, tracks, callback, tick) {
             if (!validate(tracks)) {
-                tracks[0].chant = 'At least one entry of any of the following letters is required in any track: C, D, E, F, G, A, B. Click info icon for more.'
+                tracks[0].chant = translate('ui.noletters');
             }
 
             rec.stop();
             rec.clear();
             rec.record();
+
+            delay.delayTime.value = 60 / settings.tempo * delayBeats;
+            distDelay.delayTime.value = 30 / settings.tempo * delayBeats;
 
             metronome = new Worker("app/metronome.js");
             metronome.postMessage(30000/settings.tempo|0);
@@ -595,7 +1012,7 @@
                         for (var i = data[0].length - 10000; i < data[0].length; i++) {
                             volume += Math.abs(data[0][i]);
                         }
-                        if (volume < 1) {
+                        if (volume < 10) {
                             clearInterval(recordingTail);
                             rec.stop();
                         }
@@ -638,7 +1055,7 @@
             return JSON.stringify([settingsArray, tracksArray]);
         }
 
-        function parseLink(composition, callback) {
+        function parseLink(composition) {
             var compositionJson = JSON.parse(composition);
             var data = {
                 settings: {},
@@ -654,8 +1071,6 @@
             data.settings.notes = compositionJson[0][c.NOTES];
             data.settings.splashscreen = compositionJson[0][c.SPLASH];
             data.settings.keyboard = compositionJson[0][c.KEYBOARD];
-
-            var loaded = 0;
 
             for (var i = 0; i < compositionJson[1].length; i++) {
                 data.tracks.push({});
@@ -675,39 +1090,17 @@
                 data.tracks[i].newWord = true;
 
                 data.tracks[i].volumeNode = context.createGain();
-                data.tracks[i].panNode = context.createStereoPanner();
+                data.tracks[i].panNode = context.createPanner();
 
                 data.tracks[i].effectsNode = context.createGain();
                 data.tracks[i].dryNode = context.createGain();
 
-                data.tracks[i].delay = context.createDelay(5.0);
-                data.tracks[i].feedback = context.createGain();
-                data.tracks[i].feedback.gain.value = 0.3;
-                data.tracks[i].filter = context.createBiquadFilter();
-                data.tracks[i].filter.frequency.value = 1000;
-                data.tracks[i].reverb = context.createConvolver();
-                data.tracks[i].reverb.buffer = reverb;
-
-                data.tracks[i].delay.connect(data.tracks[i].feedback);
-                data.tracks[i].feedback.connect(data.tracks[i].filter);
-                data.tracks[i].filter.connect(data.tracks[i].delay);
-                data.tracks[i].reverb.connect(data.tracks[i].effectsNode);
-                data.tracks[i].delay.connect(data.tracks[i].effectsNode);
-
                 data.tracks[i].volumeNode.connect(data.tracks[i].panNode);
-                data.tracks[i].panNode.connect(data.tracks[i].reverb);
-                data.tracks[i].panNode.connect(data.tracks[i].delay);
                 data.tracks[i].panNode.connect(data.tracks[i].dryNode);
+                data.tracks[i].panNode.connect(data.tracks[i].effectsNode);
 
                 data.tracks[i].dryNode.connect(master);
-                data.tracks[i].effectsNode.connect(master);
-
-                loadSamples(data.tracks[i].instrument, function() {
-                    loaded++;
-                    if (loaded === compositionJson[1].length) {
-                        callback();
-                    }
-                });
+                data.tracks[i].effectsNode.connect(effects[data.tracks[i].instrument]);
             }
 
             return data;
@@ -790,6 +1183,7 @@
             save: save,
             load: load,
             remove: remove,
+            undo: undo,
             encodeLink: encodeLink,
             parseLink: parseLink,
             download: download,
@@ -797,6 +1191,7 @@
             playStep: playStep,
             playChar: playChar,
             newTrack: newTrack,
+            reWire: reWire,
             loadSamples: loadSamples
         }
     });

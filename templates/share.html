@@ -16,6 +16,7 @@
     <p>{{::translate('popup.sharecomptext')}}</p>
     <p class="popup--horizontal" data-ng-click="doShare($event, true)">
         <button type="button" class="popup--share-button facebook" title="{{::translate('popup.facebook')}}"></button>
+        <button type="button" class="popup--share-button twitter" title="{{::translate('popup.twitter')}}"></button>
         <button type="button" class="popup--share-button vk" title="{{::translate('popup.vk')}}"></button>
         <button type="button" class="popup--share-button google" title="{{::translate('popup.google')}}"></button>
         <button type="button" class="popup--share-button pinterest" title="{{::translate('popup.pinterest')}}"></button>
@@ -32,3 +33,9 @@
     <p><i><strong>{{::translate('popup.tip')}}</strong> {{::translate('popup.sharetip')}} <a target='_blank' href='https://goo.gl/'>Google URL Shortener</a></i></p>
 </div>
 <button type="button" class="popup--button-close" data-ng-click="closePopups()">{{::translate('popup.close')}}</button>
+<button class="header--controls-help popup--help-button" type="button" title="{{::translate('ui.help')}}" tabindex="-1"></button>
+<button class="tooltip  popup--help-content top right" tabindex="-1">
+    <div>{{::translate('help.sharetextone')}}</div>
+    <p>{{::translate('help.sharetexttwo')}}</p>
+    <div>{{::translate('help.sharetextthree')}}</div>
+</button>
