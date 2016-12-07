@@ -60,9 +60,32 @@
             master = context.createGain();
             master.connect(context.destination);
 
-            loadReverb('StMarysAbbeyReconstructionPhase3', callback);
-
             rec = new Recorder(master);
+
+            var recordStopper = (function() {
+                var node = context.createScriptProcessor(8192, 2, 2);
+                node.onaudioprocess = function(e) {
+                    if (!rec.recording) return;
+                    var volume = 0;
+                    var inputA = e.inputBuffer.getChannelData(0);
+                    var inputB = e.inputBuffer.getChannelData(1);
+                    for (var i = 0; i < inputA.length; i++) {
+                        volume += Math.abs(inputA[i]);
+                        volume += Math.abs(inputB[i]);
+                    }
+                    if (!metronome && volume < 2 && rec.recording) {
+                        rec.stop();
+                    }
+                };
+                return node;
+            })();
+            var recordStopperSilencer = context.createGain();
+            recordStopperSilencer.gain.value = 0;
+            master.connect(recordStopper);
+            recordStopper.connect(recordStopperSilencer);
+            recordStopperSilencer.connect(context.destination);
+
+            loadReverb('StMarysAbbeyReconstructionPhase3', callback);
 
             dummyTrack = {
                 chant: '',
@@ -122,7 +145,7 @@
 
             newTrack.dryNode.connect(master);
             newTrack.effectsNode.connect(effects[newTrack.instrument]);
-            newTrack.currentLetter = 0;
+            newTrack.currentLetter = -1;
             newTrack.newWord = true;
 
             return newTrack;
@@ -1003,25 +1026,6 @@
         function stop() {
             metronome.terminate();
             metronome = undefined;
-
-            var recordingTail = setInterval(function() {
-                rec.getBuffer(function(data) {
-                    var volume = 0;
-
-                    if (data[0].length > 10000) {
-                        for (var i = data[0].length - 10000; i < data[0].length; i++) {
-                            volume += Math.abs(data[0][i]);
-                        }
-                        if (volume < 10) {
-                            clearInterval(recordingTail);
-                            rec.stop();
-                        }
-                    } else {
-                        clearInterval(recordingTail);
-                        rec.stop();
-                    }
-                });
-            }, 1000);
         }
 
         function encodeLink(settings, tracks) {
@@ -1086,7 +1090,7 @@
                 data.tracks[i].dry = compositionJson[1][i][c.DRY];
                 data.tracks[i].effects = compositionJson[1][i][c.EFFECTS];
 
-                data.tracks[i].currentLetter = 0;
+                data.tracks[i].currentLetter = -1;
                 data.tracks[i].newWord = true;
 
                 data.tracks[i].volumeNode = context.createGain();

@@ -13,7 +13,6 @@
 
         $scope.state = {
             isPlaying: false,
-            isCopySupported: document.queryCommandSupported('copy'),
             isFirstVisit: false,
             isMenuVisible: false
         };
@@ -287,9 +286,14 @@
         $scope.copyLink = function(event) {
             var field = document.getElementById('link');
             field.select();
-            document.execCommand('copy');
-            event.target.classList.add('copied');
-            event.target.title = chantService.translate('popup.copied');
+            if (document.queryCommandEnabled('copy')) {
+                event.target.classList.add('copied');
+                event.target.title = chantService.translate('popup.copied');
+                document.execCommand('copy');
+            } else {
+                event.target.classList.add('failed');
+                event.target.title = chantService.translate('popup.failed');
+            }
         };
 
         $scope.isStepInScale = function(step, instrument) {
@@ -370,7 +374,7 @@
 
             $scope.state.isPlaying = false;
             for (var i = 0; i < $scope.tracks.length; i++) {
-                $scope.tracks[i].currentLetter = 0;
+                $scope.tracks[i].currentLetter = -1;
                 $scope.tracks[i].newWord = true;
                 $scope.tracks[i].finished = true;
             }

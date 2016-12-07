@@ -27,7 +27,7 @@
     </p>
     <p class="popup--horizontal">
         <input id="link" onclick="this.setSelectionRange(0, this.value.length)" readonly type="text" data-ng-model="popup.data" class="popup--input">
-        <button data-ng-if="::state.isCopySupported" title="{{::translate('popup.copy')}}" type="button" class="popup--button-copy" data-ng-click="copyLink($event)"></button>
+        <button title="{{::translate('popup.copy')}}" type="button" class="popup--button-copy" data-ng-click="copyLink($event)"></button>
     </p>
     <p>{{::translate('popup.link')}}</p>
     <p><i><strong>{{::translate('popup.tip')}}</strong> {{::translate('popup.sharetip')}} <a target='_blank' href='https://goo.gl/'>Google URL Shortener</a></i></p>

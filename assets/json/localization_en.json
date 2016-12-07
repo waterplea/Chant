@@ -89,6 +89,7 @@
     "email": "Share via email",
     "copy": "Copy to Clipboard",
     "copied": "Link has been copied",
+    "failed": "Your browser does not support copying, please manually copy the selected link",
     "link": "Copy the link above to manually share your composition.",
     "tip": "Tip:",
     "sharetip": "If you want to share your composition by manually copying link use link shortener like",

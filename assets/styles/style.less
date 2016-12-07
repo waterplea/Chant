@@ -61,6 +61,11 @@
     100% { transform: none }
 }
 
+@keyframes firstLetter {
+    0% { transform: scaleX(0.001); }
+    100% { transform: none }
+}
+
 @keyframes slideIn {
     0% {
         margin-top: -200px;
@@ -227,6 +232,7 @@ body {
                 url(../images/clear.svg),
                 url(../images/clipboard-blank.svg),
                 url(../images/clipboard-check.svg),
+                url(../images/clipboard-failed.svg),
                 url(../images/double-bass.svg),
                 url(../images/down.svg),
                 url(../images/down-chevron.svg),
@@ -663,6 +669,7 @@ header {
 
 .header--controls {
     height: 100%;
+    white-space: nowrap;
 
     &::after {
         content: '';
@@ -1033,11 +1040,31 @@ main {
     transition: margin-bottom 0.3s ease, transform 0.5s ease, opacity 0.3s ease, box-shadow 0.3s ease;
     animation: slideIn 0.5s ease;
 
+    &[style] {
+        &::before {
+            position: absolute;
+            text-align: center;
+            font-size: 1.2em;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            content: attr(data-swipe);
+            text-shadow: 0 82px @text-color;
+            background: currentColor;
+            animation: fadeIn .3s ease;
+        }
+
+        > * {
+            display: none;
+        }
+    }
+
     &.muted {
         opacity: 0.5;
 
         span.track--chant-current::before {
-            background: none;
+            color: transparent;
         }
     }
 
@@ -1064,8 +1091,9 @@ main {
     &.electric {
         color: @electric-guitar;
 
-        .track--chant-current::before {
-            background: @electric-guitar;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @electric-guitar;
         }
 
         .track--instrument select + span,
@@ -1078,8 +1106,9 @@ main {
     &.acoustic {
         color: @acoustic-guitar;
 
-        .track--chant-current::before {
-            background: @acoustic-guitar;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @acoustic-guitar;
         }
 
         .track--instrument select + span,
@@ -1092,8 +1121,9 @@ main {
     &.bass {
         color: @bass-guitar;
 
-        .track--chant-current::before {
-            background: @bass-guitar;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @bass-guitar;
         }
 
         .track--instrument select + span,
@@ -1106,8 +1136,9 @@ main {
     &.harmonics {
         color: @harmonics;
 
-        .track--chant-current::before {
-            background: @harmonics;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @harmonics;
         }
 
         .track--instrument select + span,
@@ -1120,8 +1151,9 @@ main {
     &.ebow {
         color: @ebow;
 
-        .track--chant-current::before {
-            background: @ebow;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @ebow;
         }
 
         .track--instrument select + span,
@@ -1134,8 +1166,9 @@ main {
     &.piano {
         color: @piano;
 
-        .track--chant-current::before {
-            background: @piano;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @piano;
         }
 
         .track--instrument select + span,
@@ -1148,8 +1181,9 @@ main {
     &.rhodes {
         color: @rhodes;
 
-        .track--chant-current::before {
-            background: @rhodes;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @rhodes;
         }
 
         .track--instrument select + span,
@@ -1162,8 +1196,9 @@ main {
     &.synth {
         color: @synthesizer;
 
-        .track--chant-current::before {
-            background: @synthesizer;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @synthesizer;
         }
 
         .track--instrument select + span,
@@ -1176,8 +1211,9 @@ main {
     &.organ {
         color: @organ;
 
-        .track--chant-current::before {
-            background: @organ;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @organ;
         }
 
         .track--instrument select + span,
@@ -1190,8 +1226,9 @@ main {
     &.hammond {
         color: @hammond;
 
-        .track--chant-current::before {
-            background: @hammond;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @hammond;
         }
 
         .track--instrument select + span,
@@ -1204,8 +1241,9 @@ main {
     &.violin {
         color: @violin;
 
-        .track--chant-current::before {
-            background: @violin;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @violin;
         }
 
         .track--instrument select + span,
@@ -1218,8 +1256,9 @@ main {
     &.cello {
         color: @cello;
 
-        .track--chant-current::before {
-            background: @cello;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @cello;
         }
 
         .track--instrument select + span,
@@ -1232,8 +1271,9 @@ main {
     &.double {
         color: @double-bass;
 
-        .track--chant-current::before {
-            background: @double-bass;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @double-bass;
         }
 
         .track--instrument select + span,
@@ -1246,8 +1286,9 @@ main {
     &.harmonica {
         color: @harmonica;
 
-        .track--chant-current::before {
-            background: @harmonica;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @harmonica;
         }
 
         .track--instrument select + span,
@@ -1260,8 +1301,9 @@ main {
     &.flute {
         color: @flute;
 
-        .track--chant-current::before {
-            background: @flute;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @flute;
         }
 
         .track--instrument select + span,
@@ -1274,8 +1316,9 @@ main {
     &.chimes {
         color: @chimes;
 
-        .track--chant-current::before {
-            background: @chimes;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @chimes;
         }
 
         .track--instrument select + span,
@@ -1288,8 +1331,9 @@ main {
     &.bell {
         color: @bell;
 
-        .track--chant-current::before {
-            background: @bell;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @bell;
         }
 
         .track--instrument select + span,
@@ -1302,8 +1346,9 @@ main {
     &.sax {
         color: @saxophone;
 
-        .track--chant-current::before {
-            background: @saxophone;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @saxophone;
         }
 
         .track--instrument select + span,
@@ -1316,8 +1361,9 @@ main {
     &.tank {
         color: @steel-tongue-drum;
 
-        .track--chant-current::before {
-            background: @steel-tongue-drum;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @steel-tongue-drum;
         }
 
         .track--instrument select + span,
@@ -1330,8 +1376,9 @@ main {
     &.drums {
         color: @drums;
 
-        .track--chant-current::before {
-            background: @drums;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @drums;
         }
 
         .track--instrument select + span,
@@ -1344,8 +1391,9 @@ main {
     &.waterplea {
         color: @waterplea;
 
-        .track--chant-current::before {
-            background: @waterplea;
+        .track--chant-current::before,
+        .track--chant-current::after {
+            color: @waterplea;
         }
 
         .track--instrument select + span,
@@ -1367,38 +1415,39 @@ main {
     }
 }
 
-.track--chant {
-    position: relative;
+.track--chant-wrapper {
     flex: 1;
-    font-family: 'Inconsolata', monospace;
-    color: @text-color;
-    padding: 30px 30px 30px 0;
-    border-left: 30px solid transparent;
-    font-size: 18px;
-    line-height: 17px;
-    max-width: 660px;
-    max-height: 200px;
+    position: relative;
+}
+
+.track--chant {
+    position: absolute;
     overflow-y: auto;
     overflow-x: hidden;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    font-family: 'Inconsolata', monospace;
+    color: @text-color;
+    padding: 30px;
+    border: none;
+    font-size: 18px;
+    line-height: 17px;
     white-space: pre-wrap;
     word-wrap: break-word;
-    word-break: break-word;
-    transition: max-height 0.3s ease;
+    resize: none;
+    transition: max-height .3s ease, opacity .3s ease;
 
-    &[contenteditable=true] span.track--chant-current::before {
-        background: none;
-    }
-
-    &:empty::after {
-        content: attr(data-placeholder);
-        opacity: 0.5;
-    }
-
-    &:nth-child(2) {
+    &.track--chant-help {
         font-family: inherit;
         white-space: normal;
         font-size: inherit;
     }
+}
+
+.track--chant-display {
 }
 
 .track--help-instrument,
@@ -1492,16 +1541,33 @@ main {
 
     &::before {
         position: absolute;
+        background: currentColor;
         content: '';
         width: 9px;
         height: 18px;
         z-index: 1;
+        transform-origin: left;
         animation: currentLetter 0.3s ease;
         animation-fill-mode: backwards;
     }
 
+    &:first-child::before {
+        animation: firstLetter 0.3s ease;
+    }
+
     &.match::before {
         z-index: -1;
+    }
+
+    &.match::after {
+        content: '';
+        position: absolute;
+        top: 7px;
+        left: 2px;
+        width: 4px;
+        height: 4px;
+        border-radius: 100%;
+        animation: pointOfInterest 0.8s ease;
     }
 }
 
@@ -1518,7 +1584,7 @@ main {
     padding: 20px;
     box-shadow: 1px 1px 10px fade(black, 10%);
     overflow: hidden;
-    transition: color 0.3s ease;
+    transition: color .3s ease, opacity .3s ease, max-height .3s ease;
 
     &::before {
         content: '';
@@ -2361,6 +2427,11 @@ footer {
         background: url(../images/clipboard-check.svg) center no-repeat;
         background-size: 66%;
     }
+
+    &.failed {
+        background: url(../images/clipboard-failed.svg) center no-repeat;
+        background-size: 66%;
+    }
 }
 
 .popup--share-button {
@@ -2977,7 +3048,7 @@ input[type=range] {
     .track--chant {
         max-height: 155px;
         max-width: 100%;
-        padding: 20px 40px 20px 0;
+        padding: 20px 30px;
     }
 
     .track--aside {
@@ -2987,7 +3058,6 @@ input[type=range] {
         overflow: hidden;
         max-height: 45px;
         height: 90px;
-        transition: max-height 0.3s ease;
     }
 
     .track--instrument {

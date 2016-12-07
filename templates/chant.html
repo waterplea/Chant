@@ -1,20 +1,22 @@
-<article class="main--track {{track.instrument}} {{track.removed}}"
+<article class="main--track {{track.instrument}} {{track.removed}}" data-swipe="Swipe to remove track"
          data-ng-class="{ 'expanded' : showMore, 'muted' : track.muted }" data-ng-cloak>
-    <div data-ng-attr-contenteditable="{{ !disabled }}" class="track--chant" data-ng-show="!help"
-         data-ng-blur="updateStartingPosition();" data-ng-keypress="playChar($event)"
-         data-placeholder="{{::translate('chant.placeholder')}}"></div>
-    <div class="track--chant" data-ng-show="help">
-        {{::translate('help.trackpressone')}} <span class="track--help"></span> {{::translate('help.trackpresstwo')}}
-        <p>{{::translate('help.trackcontrols')}}</p>
-        <div class="track--help-instrument">{{::translate('help.trackinstrument')}}</div>
-        <div class="track--help-volume">{{::translate('help.trackvolume')}}</div>
-        <div class="track--help-panning">{{::translate('help.trackpanning')}}</div>
-        <div class="track--help-octave">{{::translate('help.trackoctave')}}</div>
-        <div class="track--help-effects">{{::translate('help.trackeffects')}}</div>
-        <div class="track--help-lock">{{::translate('help.tracklock')}}</div>
-        <div class="track--help-key">{{::translate('help.trackkey')}}</div>
-        <div class="track--help-accidentals">{{::translate('help.trackaccidentals')}}</div>
-        <div class="track--help-solo">{{::translate('help.tracksolo')}}</div>
+    <div class="track--chant-wrapper">
+        <div class="track--chant track--chant-display" data-ng-show="!help && disabled"></div>
+        <textarea class="track--chant" data-ng-model="track.chant" data-ng-show="!help && !disabled" data-ng-blur="updateStartingPosition($event);"
+                  data-ng-keypress="playChar($event)" placeholder="{{::translate('chant.placeholder')}}"></textarea>
+        <div class="track--chant track--chant-help" data-ng-show="help">
+            {{::translate('help.trackpressone')}} <span class="track--help"></span> {{::translate('help.trackpresstwo')}}
+            <p>{{::translate('help.trackcontrols')}}</p>
+            <div class="track--help-instrument">{{::translate('help.trackinstrument')}}</div>
+            <div class="track--help-volume">{{::translate('help.trackvolume')}}</div>
+            <div class="track--help-panning">{{::translate('help.trackpanning')}}</div>
+            <div class="track--help-octave">{{::translate('help.trackoctave')}}</div>
+            <div class="track--help-effects">{{::translate('help.trackeffects')}}</div>
+            <div class="track--help-lock">{{::translate('help.tracklock')}}</div>
+            <div class="track--help-key">{{::translate('help.trackkey')}}</div>
+            <div class="track--help-accidentals">{{::translate('help.trackaccidentals')}}</div>
+            <div class="track--help-solo">{{::translate('help.tracksolo')}}</div>
+        </div>
     </div>
 
     <button class="header--controls-help" type="button" title="{{::translate('ui.help')}}" tabindex="-1" data-ng-click="help = !help"></button>

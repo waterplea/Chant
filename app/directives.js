@@ -31,9 +31,8 @@
                     $scope.$emit('solo', $scope.track);
                 };
 
-                $scope.updateStartingPosition = function() {
-                    var range = window.getSelection().getRangeAt(0);
-                    if (range && range.endOffset - range.startOffset >= 1) $scope.$emit('updateStartingPosition', range.startOffset);
+                $scope.updateStartingPosition = function(event) {
+                    if (event.target.selectionEnd - event.target.selectionStart >= 1) $scope.$emit('updateStartingPosition', event.target.selectionStart);
                 };
 
                 $scope.translate = function(string) {
@@ -53,8 +52,6 @@
 					});
                 });
 
-                element[0].querySelector('.track--chant').innerHTML = scope.track.chant;
-
                 element[0].addEventListener('touchstart', handleTouchStart, false);
                 element[0].addEventListener('touchmove', handleTouchMove, false);
                 element[0].addEventListener('touchend', handleTouchEnd, false);
@@ -62,7 +59,6 @@
                 element[0].querySelector('.track--volume-input').addEventListener('wheel', onWheel);
                 element[0].querySelector('.track--panning-input').addEventListener('wheel', onWheel);
                 element[0].querySelector('.track--effects-input').addEventListener('wheel', onWheel);
-
                 element[0].querySelector('.track--remove').addEventListener('click', function() {
                     scope.$emit('removeTrack', { track: scope.track, direction: 'left' });
                 });
@@ -120,19 +116,6 @@
                     }
                 }
 
-                function getCaretCharacterOffsetWithin(element) {
-                    var caretOffset = 0;
-                    var selection = window.getSelection();
-                    if (selection.rangeCount > 0) {
-                        var range = selection.getRangeAt(0);
-                        var preCaretRange = range.cloneRange();
-                        preCaretRange.selectNodeContents(element);
-                        preCaretRange.setEnd(range.endContainer, range.endOffset);
-                        caretOffset = preCaretRange.toString().length;
-                    }
-                    return caretOffset;
-                }
-
                 function getDifference(a, b) {
                     var i = 0;
                     var j = 0;
@@ -164,30 +147,9 @@
                     scope.$emit('charPressed', result);
                 }
 
-                element[0].querySelector('.track--chant').addEventListener('input', function(event) {
-                    scope.track.chant = event.target.textContent;
-                    if (event.target.innerHTML === event.target.textContent) {
-                        parseInput(event.target.textContent);
-                        return;
-                    }
-                    var position = getCaretCharacterOffsetWithin(event.target);
-                    event.target.innerHTML = event.target.textContent.replace('<', '&lt;');
-                    var range = document.createRange();
-                    var sel = window.getSelection();
-                    if (event.target.childNodes[0]) {
-                        range.setStart(event.target.childNodes[0], position);
-                    } else {
-                        range.setStart(event.target, 0);
-                    }
-                    range.collapse(true);
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-
+                element[0].querySelector('textarea').addEventListener('input', function(event) {
+                    element[0].querySelector('.track--chant').textContent = event.target.value;
                     parseInput(event.target.textContent);
-                });
-
-                scope.$watch('track.chant', function(value) {
-                    if (element[0].querySelector('.track--chant').innerHTML !== value) element[0].querySelector('.track--chant').innerHTML = value;
                 });
 
                 scope.$watch('disabled', function(value) {
@@ -220,6 +182,8 @@
                 });
 
                 scope.$watch('track.currentLetter', function(value) {
+                    if (!scope.track.chant.length) return;
+
                     var previousStep = false;
                     var currentStep = false;
                     var textarea = element[0].querySelector('.track--chant');
@@ -262,24 +226,30 @@
                             break;
                     }
 
-                    if (textarea.textContent) {
-                        var chant = textarea.textContent;
-                        var before = '<span class="track--chant-before ';
-                        var current = '<span class="track--chant-current ';
-                        var after = '</span>';
+                    var chant = scope.track.chant;
+                    var before = '<span class="track--chant-before ';
+                    var current = '<span class="track--chant-current ';
+                    var after = '</span>';
 
-                        if (value > 1) {
-                            chant = before + '">' + chant.substring(0, value - 1) + after +
-                                before + (previousStep ? 'match' : '') + '">' + chant.substr(value - 1, 1) + after +
-                                current + (currentStep ? 'match' : '') + '">' + chant.substr(value, 1) + after +
-                                chant.substring(value + 1, chant.length);
-                        } else {
-                            chant = before + '">' + chant.substring(0, value) + after +
-                                current + (currentStep ? 'match' : '') + '">' + chant.substr(value, 1) + after +
-                                chant.substring(value + 1, chant.length);
-                        }
-                        textarea.innerHTML = chant;
+                    if (value > 1) {
+                        chant = before + '">' + chant.substring(0, value - 1) + after +
+                            before + (previousStep ? 'match' : '') + '">' + chant.substr(value - 1, 1) + after +
+                            current + (currentStep ? 'match' : '') + '">' + chant.substr(value, 1) + after +
+                            chant.substring(value + 1, chant.length);
                     }
+
+                    if (value === 1) {
+                        chant = before + '">' + chant.substring(0, value) + after +
+                            current + (currentStep ? 'match' : '') + '">' + chant.substr(value, 1) + after +
+                            chant.substring(value + 1, chant.length);
+                    }
+
+                    if (value === 0) {
+                        chant = current + (currentStep ? 'match' : '') + '">' + chant.substr(value, 1) + after +
+                            chant.substring(value + 1, chant.length);
+                    }
+
+                    textarea.innerHTML = chant;
 
                     if (scope.track.finished == undefined || scope.track.finished && value === 0) textarea.innerHTML = textarea.textContent
                 });
