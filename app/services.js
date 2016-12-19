@@ -85,7 +85,9 @@
             recordStopper.connect(recordStopperSilencer);
             recordStopperSilencer.connect(context.destination);
 
-            loadReverb('StMarysAbbeyReconstructionPhase3', callback);
+            loadReverb('StMarysAbbeyReconstructionPhase3', function() {
+                loadSamples('piano', callback);
+            });
 
             dummyTrack = {
                 chant: '',
@@ -257,20 +259,11 @@
                         tracks[i].newWord = false;
                     }
 
-                    var startTime = context.currentTime;
-                    if (tracks[i].instrument !== 'synth') {
-                        startTime += 2048 / context.sampleRate;
-                    }
-
-                    if (source.playbackRate.value > 0.5) {
-                        startTime += 0.05;
-                    }
-
                     if (tracks[i].instrument === 'organ' && tracks[i].effects > 25) {
                         detune.connect(source.detune);
                     }
 
-                    source.start(startTime);
+                    source.start();
 
                     setTimeout(function() {
                         source.disconnect();
@@ -292,6 +285,18 @@
         }
 
         function loadSamples(instrument, callback) {
+            var extension = 'mp3';
+
+            var a = document.createElement('audio');
+            if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, ''))) {
+                extension = 'ogg';
+            }
+
+            if (localStorage.getItem('hd')) {
+                extension = 'wav';
+            }
+
+
             if (instruments[instrument]) {
 				if (callback) callback();
                 return;
@@ -299,13 +304,13 @@
             bufferLoader = new BufferLoader(
                 context,
                 [
-                    'assets/audio/' + instrument + '/1.' + (localStorage.getItem('hd') ? 'wav' : 'mp3'),
-                    'assets/audio/' + instrument + '/2.' + (localStorage.getItem('hd') ? 'wav' : 'mp3'),
-                    'assets/audio/' + instrument + '/3.' + (localStorage.getItem('hd') ? 'wav' : 'mp3'),
-                    'assets/audio/' + instrument + '/4.' + (localStorage.getItem('hd') ? 'wav' : 'mp3'),
-                    'assets/audio/' + instrument + '/5.' + (localStorage.getItem('hd') ? 'wav' : 'mp3'),
-                    'assets/audio/' + instrument + '/6.' + (localStorage.getItem('hd') ? 'wav' : 'mp3'),
-                    'assets/audio/' + instrument + '/7.' + (localStorage.getItem('hd') ? 'wav' : 'mp3')
+                    'assets/audio/' + instrument + '/1.' + extension,
+                    'assets/audio/' + instrument + '/2.' + extension,
+                    'assets/audio/' + instrument + '/3.' + extension,
+                    'assets/audio/' + instrument + '/4.' + extension,
+                    'assets/audio/' + instrument + '/5.' + extension,
+                    'assets/audio/' + instrument + '/6.' + extension,
+                    'assets/audio/' + instrument + '/7.' + extension
                 ],
                 function(data) {
                     instruments[instrument] = data;
@@ -354,7 +359,7 @@
             effects['ebow'] = context.createGain();
             effects['ebow'].gain.value = 0.6;
             effects['piano'] = context.createGain();
-            //effects['rhodes'] = context.createGain();
+            effects['rhodes'] = context.createGain();
             effects['synth'] = context.createGain();
             effects['organ'] = context.createGain();
             effects['organ'].gain.value = 0.5;
@@ -512,6 +517,9 @@
             var splitter = context.createChannelSplitter(2);
             var merger = context.createChannelMerger(2);
             var flanger = context.createGain();
+            var flangerFeedback = context.createGain();
+            flangerFeedback.gain.value = 0.5;
+            flangerFeedback.connect(flanger);
             var sfllfb = context.createGain();
             var sflrfb = context.createGain();
             var sflspeed = context.createOscillator();
@@ -545,7 +553,7 @@
 
             /* Bit Crusher */
             var bitCrusher = (function() {
-                var node = context.createScriptProcessor(2048, 2, 2);
+                var node = context.createScriptProcessor(1024, 2, 2);
                 node.bits = 6; // between 1 and 16
                 node.normfreq = 0.2; // between 0.0 and 1.0
                 var step = Math.pow(1/2, node.bits);
@@ -612,7 +620,6 @@
             effects['electric'].connect(reverb);
             effects['bass'].connect(bassFilterFeedback);
             effects['bass'].connect(master);
-            //effects['bass'].connect(wahwah);
             effects['harmonics'].connect(reverbFeedback);
             effects['harmonics'].connect(delay);
             effects['harmonics'].connect(reverser);
@@ -622,8 +629,11 @@
             effects['piano'].connect(reverser);
             effects['piano'].connect(delay);
             effects['piano'].connect(reverbFeedback);
-            //effects['rhodes'].connect(reverb);
-            //effects['rhodes'].connect(delay);
+            effects['rhodes'].connect(reverbFeedback);
+            effects['rhodes'].connect(flangerFeedback);
+            effects['rhodes'].connect(leslie);
+            effects['rhodes'].connect(distFeedback);
+            effects['rhodes'].connect(delay);
             //effects['synth'].connect(reverb);
             //effects['synth'].connect(highAttenuator);
             effects['synth'].connect(bitCrusher);
@@ -783,7 +793,7 @@
         function downloadMp3(data) {
             encoder = new Worker("app/encoder.js");
             encoder.onmessage = onEncoderCallback;
-            encoder.postMessage(data)
+            encoder.postMessage({ data: data, sampleRate: context.sampleRate })
         }
 
         function onEncoderCallback(event) {
@@ -1056,17 +1066,23 @@
                 tracksArray[i][c.EFFECTS] = tracks[i].effects;
             }
 
-            return JSON.stringify([settingsArray, tracksArray]);
+            return LZString.compressToEncodedURIComponent(JSON.stringify([settingsArray, tracksArray]));
         }
 
         function parseLink(composition) {
-            var compositionJson = JSON.parse(composition);
+            var compositionJson = JSON.parse(LZString.decompressFromEncodedURIComponent(composition));
             var data = {
                 settings: {},
                 tracks: []
             };
 
-            data.settings.tempo = compositionJson[0][c.TEMPO];
+            try {
+                data.settings.tempo = compositionJson[0][c.TEMPO];
+            }
+            catch(e) {
+                compositionJson = JSON.parse(composition);
+                data.settings.tempo = compositionJson[0][c.TEMPO];
+            }
             data.settings.loop = compositionJson[0][c.LOOP];
             data.settings.key = compositionJson[0][c.KEY];
             data.settings.keys = compositionJson[0][c.KEYS];

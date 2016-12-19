@@ -149,7 +149,7 @@
 
                 element[0].querySelector('textarea').addEventListener('input', function(event) {
                     element[0].querySelector('.track--chant').textContent = event.target.value;
-                    parseInput(event.target.textContent);
+                    parseInput(event.target.value);
                 });
 
                 scope.$watch('disabled', function(value) {

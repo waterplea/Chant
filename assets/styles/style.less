@@ -326,7 +326,7 @@ body {
     right: 20px;
     color: white;
     background: #444;
-    padding: 5px 10px;
+    padding: 15px 20px;
     border-radius: 3px;
     box-shadow: 2px 2px fade(black, 10%);
     overflow: hidden;
@@ -432,6 +432,7 @@ body {
     z-index: 2;
     position: fixed;
     text-align: left;
+    white-space: normal;
     font-size: 18px;
     font-weight: 400;
     padding: 20px;
@@ -653,6 +654,7 @@ header {
 .header--waterplea {
     display: inline-block;
     vertical-align: baseline;
+    outline: none;
     height: 20px;
     width: 107px;
     opacity: 0.75;
@@ -997,7 +999,7 @@ main {
     border: none;
     min-height: 100px;
     width: 100%;
-    max-width: 1000px;
+    max-width: 1005px;
     font-size: 18px;
     color: inherit;
     transition: background .3s ease, margin-top .3s ease;
@@ -1032,7 +1034,7 @@ main {
     position: relative;
     margin: 5px 0;
     min-height: 200px;
-    max-width: 1000px;
+    max-width: 1005px;
     width: 100%;
     background: white;
     overflow: hidden;
@@ -1063,7 +1065,8 @@ main {
     &.muted {
         opacity: 0.5;
 
-        span.track--chant-current::before {
+        span.track--chant-current::before,
+        span.track--chant-current.match::after {
             color: transparent;
         }
     }
@@ -1431,6 +1434,7 @@ main {
     bottom: 0;
     font-family: 'Inconsolata', monospace;
     color: @text-color;
+    background: transparent;
     padding: 30px;
     border: none;
     font-size: 18px;
@@ -1445,9 +1449,6 @@ main {
         white-space: normal;
         font-size: inherit;
     }
-}
-
-.track--chant-display {
 }
 
 .track--help-instrument,
@@ -1961,12 +1962,12 @@ footer {
 }
 
 .accidentals--piano {
-    font-size: 0.1vh;
-    max-width: 720em;
+    font-size: 100vh;
+    max-width: .72em;
     justify-content: center;
     position: relative;
-    margin: -220em auto 80em;
-    min-height: 500em;
+    margin: -.22em auto .08em;
+    min-height: .5em;
     display: flex;
     flex-direction: row;
     transform-origin: bottom;
@@ -1982,20 +1983,20 @@ footer {
         background: darken(@text-color, 3%);
         background-clip: content-box;
         top: 0;
-        left: 6em;
-        right: 6em;
+        left: .006em;
+        right: .006em;
         bottom: 0;
-        transform: translateZ(-76em);
-        box-shadow: 0 0 40em fade(#444, 40%), 0 100em white;
+        transform: translateZ(-.076em);
+        box-shadow: 0 0 .04em fade(#444, 40%), 0 .1em white;
     }
 
     &::after {
-        left: 25em;
-        right: 25em;
+        left: .025em;
+        right: .025em;
         bottom: auto;
-        height: 80em;
+        height: .08em;
         transform-origin: top;
-        transform: rotateX(-89deg) translateY(2em);
+        transform: rotateX(-89deg) translateY(.002em);
     }
 
     .key-1,
@@ -2007,24 +2008,24 @@ footer {
     .key-12 {
         font-size: inherit;
         position: relative;
-        width: 76em;
-        height: 500em;
+        width: .076em;
+        height: .5em;
         border: none;
         padding: 0;
         outline: none;
-        border-top: 252em solid transparent;
+        border-top: .252em solid transparent;
         box-sizing: border-box;
         background-color: #edefee;
         background-clip: content-box;
-        margin: 0 2em;
+        margin: 0 .002em;
         transform-origin: top;
         transform-style: preserve-3d;
-        box-shadow: inset 2em 0 2em -1em fade(white, 80%),
-                    inset -2em 0 2em -1em fade(white, 80%),
-                    inset 10em -10em 10em -10em fade(@text-color, 30%),
-                    inset -10em 0 10em -10em fade(@text-color, 30%),
-                    inset 0 -200em 200em -200em fade(white, 70%),
-                    inset 0 0 0 1000em fade(#edefee, 50%);
+        box-shadow: inset .002em 0 .002em -.001em fade(white, 80%),
+                    inset -.002em 0 .002em -.001em fade(white, 80%),
+                    inset .01em -.01em .01em -.01em fade(@text-color, 30%),
+                    inset -.01em 0 .01em -.01em fade(@text-color, 30%),
+                    inset 0 -.2em .2em -.2em fade(white, 70%),
+                    inset 0 0 0 1em fade(#edefee, 50%);
         transition: background-color 0.3s ease, transform 0.3s ease;
 
         &:not(.selected):hover {
@@ -2052,55 +2053,55 @@ footer {
             content: '';
             background: #edefee;
             position: absolute;
-            height: 252em;
-            top: -250em;
+            height: .252em;
+            top: -.25em;
             left: 0;
-            box-shadow: inset 2em 0 2em -1em fade(white, 80%),
-                        inset -2em 0 2em -1em fade(white, 80%),
-                        inset 0 200em 200em -200em fade(@text-color, 30%),
-                        inset 10em 10em 10em -10em fade(@text-color, 30%),
-                        inset -10em 0 10em -10em fade(@text-color, 30%),
-                        inset 0 0 0 1000em fade(#edefee, 50%);
+            box-shadow: inset .002em 0 .002em -.001em fade(white, 80%),
+                        inset -.002em 0 .002em -.001em fade(white, 80%),
+                        inset 0 .2em .2em -.2em fade(@text-color, 30%),
+                        inset .01em .01em .01em -.01em fade(@text-color, 30%),
+                        inset -.01em 0 .01em -.01em fade(@text-color, 30%),
+                        inset 0 0 0 1em fade(#edefee, 50%);
             transition: background 0.3s ease;
         }
 
         &::after {
             top: 100%;
             width: 100%;
-            height: 76em;
+            height: .076em;
             transform-origin: top;
             transform: rotateX(-90deg);
-            box-shadow: inset 0 -30em 50em -30em fade(black, 30%),
-                        inset 0 2em 1em white,
-                        inset 0 4em fade(black, 10%),
-                        inset 0 10em 10em -10em fade(black, 40%);
+            box-shadow: inset 0 -.03em .05em -.03em fade(black, 30%),
+                        inset 0 .002em .001em white,
+                        inset 0 .004em fade(black, 10%),
+                        inset 0 .01em .01em -.01em fade(black, 40%);
         }
     }
 
     .key-1::before,
     .key-6::before{
-        right: 26em;
+        right: .026em;
     }
 
     .key-3::before {
-        left: 14em;
-        right: 14em;
+        left: .014em;
+        right: .014em;
     }
 
     .key-5::before,
     .key-12::before {
-        left: 26em;
+        left: .026em;
         right: 0;
     }
 
     .key-8::before {
-        left: 14em;
-        right: 20em;
+        left: .014em;
+        right: .020em;
     }
 
     .key-10::before {
-        left: 20em;
-        right: 14em;
+        left: .020em;
+        right: .014em;
     }
 
     .key-2,
@@ -2110,22 +2111,22 @@ footer {
     .key-11 {
         font-size: inherit;
         position: relative;
-        width: 32em;
-        height: 250em;
+        width: .032em;
+        height: .25em;
         color: @text-color;
         border: none;
         padding: 0;
         outline: none;
         background: lighten(@text-color, 10%);
-        border-top-left-radius: 6em;
-        border-top-right-radius: 6em;
-        transform: translateZ(35em);
+        border-top-left-radius: .006em;
+        border-top-right-radius: .006em;
+        transform: translateZ(.035em);
         transform-style: preserve-3d;
         transform-origin: top;
-        box-shadow: inset 0 -7em 5em,
-                    inset 4em 0 5em,
-                    inset -4em 0 5em,
-                    inset 0 0 0 1000em fade(lighten(@text-color, 10%), 50%);
+        box-shadow: inset 0 -.007em .005em,
+                    inset .004em 0 .005em,
+                    inset -.004em 0 .005em,
+                    inset 0 0 0 1em fade(lighten(@text-color, 10%), 50%);
         z-index: 1;
         transition: background 0.3s ease, transform 0.3s ease;
 
@@ -2138,42 +2139,42 @@ footer {
         }
 
         &:active {
-            transform: rotateX(-5deg) translateZ(35em);
+            transform: rotateX(-5deg) translateZ(.035em);
         }
 
         &::before {
             content: '';
             position: absolute;
             background: @text-color;
-            border-top-left-radius: 6em;
+            border-top-left-radius: .006em;
             top: 0;
             height: 100%;
-            width: 39em;
+            width: .039em;
             transform-origin: left;
-            left: 1em;
+            left: .001em;
             transform: rotateY(93deg);
-            box-shadow: inset -50em 0 50em -50em black,
-                        20em 0 darken(@text-color, 10%),
-                        40em 0 darken(@text-color, 10%);
+            box-shadow: inset -.05em 0 .05em -.05em black,
+                        .02em 0 darken(@text-color, 10%),
+                        .04em 0 darken(@text-color, 10%);
         }
 
         &::after {
             content: '';
             position: absolute;
             top: 100%;
-            left: -2em;
+            left: -.002em;
             width: 100%;
-            border-bottom: 31em solid darken(@text-color, 2%);
-            border-left: 2em solid transparent;
-            border-right: 2em solid transparent;
+            border-bottom: .031em solid darken(@text-color, 2%);
+            border-left: .002em solid transparent;
+            border-right: .002em solid transparent;
             height: 0;
             transform-origin: top;
             transform: rotateX(-90deg);
-            box-shadow: 0 7em 20em fade(black, 25%),
-                        0 3em 5em -2em fade(white, 80%),
-                        0 5em,
-                        0 20em darken(@text-color, 2%),
-                        0 40em darken(@text-color, 2%);
+            box-shadow: 0 .007em .02em fade(black, 25%),
+                        0 .003em .005em -.002em fade(white, 80%),
+                        0 .005em,
+                        0 .02em darken(@text-color, 2%),
+                        0 .04em darken(@text-color, 2%);
         }
 
         &:nth-child(-n + 7)::before {
@@ -2184,16 +2185,16 @@ footer {
 
     .key-2,
     .key-7 {
-        margin: 0 -10em 0 -22em;
+        margin: 0 -.01em 0 -.022em;
     }
 
     .key-4,
     .key-11 {
-        margin: 0 -22em 0 -10em;
+        margin: 0 -.022em 0 -.01em;
     }
 
     .key-9 {
-        margin: 0 -16em 0 -16em;
+        margin: 0 -.016em 0 -.016em;
     }
 }
 

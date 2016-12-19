@@ -1,7 +1,12 @@
 The MIT License (MIT)
 
 Copyright (c) 2016 Alex Inkin
+
 Flanger and Wah effects code — Copyright (c) 2014 Chris Wilson
+LAME mp3 encoder is licensed under LGPL — http://lame.sourceforge.net/
+Lamejs — Copyright (c) 2016 Alex Zhukov
+Recorder.js — Copyright (c) 2013 Matt Diamond
+lz-string — Copyright (c) 2013 Pieroxy
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

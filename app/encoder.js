@@ -1,11 +1,11 @@
 importScripts('../assets/lib/lame.min.js');
 
-var mp3encoder = new lamejs.Mp3Encoder(2, 44100, 320);
-var mp3Data = [];
-var mp3buf, leftChunk, rightChunk, buffers;
-
 onmessage = function (event) {
-    buffers = event.data;
+    var mp3encoder = new lamejs.Mp3Encoder(2, event.data.sampleRate, 320);
+    var mp3Data = [];
+    var mp3buf, leftChunk, rightChunk, buffers;
+
+    buffers = event.data.data;
 
     var left = new Int16Array(buffers[0].length);
     var right = new Int16Array(buffers[0].length);

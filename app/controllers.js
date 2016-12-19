@@ -499,6 +499,13 @@
         }
 
         function onKeydown(event) {
+            if ((event.ctrlKey || event.metaKey) && String.fromCharCode(event.which).toLowerCase() === 's') {
+                event.preventDefault();
+                $scope.saveComposition($scope.settings.title);
+                $scope.$digest();
+                return;
+            }
+
             if (event.keyCode === 27) {
                 if ($scope.dialog) $scope.closeDialog();
                 if ($scope.popup) $scope.closePopups();
@@ -574,8 +581,7 @@
         }
 
         function shareButton() {
-            var link = window.location.origin + window.location.pathname + '?c=' +
-                encodeURIComponent(chantService.encodeLink($scope.settings, $scope.tracks));
+            var link = window.location.origin + window.location.pathname + '?c=' + chantService.encodeLink($scope.settings, $scope.tracks);
             showPopup('share', link);
         }
 
