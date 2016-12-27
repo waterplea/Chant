@@ -369,7 +369,8 @@
             effects['double'] = context.createGain();
             effects['harmonica'] = context.createGain();
             effects['harmonica'].gain.value = 0.5;
-            //effects['flute'] = context.createGain();
+            effects['flute'] = context.createGain();
+            effects['flute'].gain.value = 3.0;
             //effects['chimes'] = context.createGain();
             //effects['bell'] = context.createGain();
             //effects['sax'] = context.createGain();
@@ -420,6 +421,10 @@
             oscBass.connect(oscBassAmp);
             oscBassAmp.connect(bassFilter.frequency);
             oscBass.start();
+            var fluteFeedback = context.createGain();
+            fluteFeedback.gain.value = 0.1;
+            fluteFeedback.connect(bassFilter);
+            fluteFeedback.connect(master);
 
             /* Acoustic filter */
             reverbFeedback.gain.value = 0.1;
@@ -653,8 +658,11 @@
             effects['harmonica'].connect(bassFilterFeedback);
             effects['harmonica'].connect(reverser);
             effects['harmonica'].connect(reverb);
-            //effects['flute'].connect(reverb);
-            //effects['flute'].connect(delay);
+            effects['flute'].connect(reverbFeedback);
+            //effects['flute'].connect(acousticFilterFeedback);
+            //effects['flute'].connect(leslie);
+            //effects['flute'].connect(wahwah);
+            effects['flute'].connect(fluteFeedback);
             //effects['chimes'].connect(reverb);
             //effects['chimes'].connect(delay);
             //effects['bell'].connect(reverb);
@@ -1070,7 +1078,12 @@
         }
 
         function parseLink(composition) {
-            var compositionJson = JSON.parse(LZString.decompressFromEncodedURIComponent(composition));
+            try {
+                var compositionJson = JSON.parse(LZString.decompressFromEncodedURIComponent(composition));
+            }
+            catch(e) {
+                return false;
+            }
             var data = {
                 settings: {},
                 tracks: []

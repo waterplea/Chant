@@ -45,7 +45,9 @@
     "cancel": "Cancel",
     "note": "Note",
     "confirm": "Confirm",
-    "download": "Downloading a recording requires you to playback your composition."
+    "download": "Downloading a recording requires you to playback your composition.",
+    "error": "Error",
+    "link": "The address for this composition is incorrect. This could happen if the link was trimmed, VK.com is known to do that. Try copying and pasting the link directly into address bar."
   },
   "popup": {
     "close": "Close",
@@ -126,6 +128,7 @@
     "key": "Root key",
     "accidentals": "Accidentals",
     "help": "Help",
+    "hd": "Use lossless audio",
     "add": "Add track",
     "clear": "Clear composition",
     "cleared": "Composition cleared.",

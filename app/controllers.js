@@ -11,6 +11,8 @@
             return;
         }
 
+        $scope.hd = !!localStorage.getItem('hd');
+
         $scope.state = {
             isPlaying: false,
             isFirstVisit: false,
@@ -122,6 +124,14 @@
                 chantService.playChar(data, $scope.lastTrack, $scope.settings);
             }
         });
+
+        $scope.toggleHd = function() {
+            if ($scope.hd) {
+                localStorage.setItem('hd', true);
+            } else {
+                localStorage.removeItem('hd');
+            }
+        };
 
         $scope.validateTitle = function() {
             if (!$scope.settings.title && titleBackup) {
@@ -417,10 +427,18 @@
             if (window.location.search) {
                 var composition = window.location.search.substr(3, window.location.search.length);
                 composition = chantService.parseLink(decodeURIComponent(composition));
-                $scope.settings = composition.settings;
-                $scope.tracks = composition.tracks;
-                if ($scope.settings.splashscreen) {
-                    $timeout(function() { showPopup('splashscreen'); }, 400);
+                if (composition) {
+                    $scope.settings = composition.settings;
+                    $scope.tracks = composition.tracks;
+                    if ($scope.settings.splashscreen) {
+                        $timeout(function() { showPopup('splashscreen'); }, 400);
+                    }
+                } else {
+                    $scope.dialog = {
+                        title: chantService.translate('dialog.error'),
+                        text: chantService.translate('dialog.link')
+                    };
+                    $scope.addTrack();
                 }
             } else {
                 $scope.addTrack();

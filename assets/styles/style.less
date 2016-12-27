@@ -225,6 +225,7 @@ body {
                 url(../images/bass-guitar.svg),
                 url(../images/bell.svg),
                 url(../images/cello.svg),
+                url(../images/chant.svg),
                 url(../images/check.svg),
                 url(../images/check-black.svg),
                 url(../images/check-empty.svg),
@@ -258,7 +259,6 @@ body {
                 url(../images/left.svg),
                 url(../images/load.svg),
                 url(../images/locked.svg),
-                url(../images/logo.png),
                 url(../images/logo.svg),
                 url(../images/logo-red.svg),
                 url(../images/loop.svg),
@@ -269,6 +269,7 @@ body {
                 url(../images/notes.svg),
                 url(../images/ocarina.svg),
                 url(../images/octave.svg),
+                url(../images/organ.svg),
                 url(../images/pause.svg),
                 url(../images/piano.svg),
                 url(../images/play.svg),
@@ -632,7 +633,7 @@ header {
         display: inline-block;
         width: 80px;
         height: 80px;
-        background: url(../images/logo.png);
+        background: url(../images/chant.svg);
         background-size: 100%;
     }
 
@@ -678,6 +679,24 @@ header {
         display: inline-block;
         vertical-align: middle;
         height: 100%;
+    }
+}
+
+.header--controls-hd,
+.footer--controls-hd {
+    vertical-align: middle;
+
+    span {
+        opacity: 0.3;
+        font-weight: 600;
+    }
+
+    input {
+        margin: 0;
+    }
+
+    input:checked + span {
+        opacity: 1;
     }
 }
 
@@ -1956,7 +1975,7 @@ footer {
         outline: none !important;
     }
 
-    .footer--controls-help {
+    .footer--controls-hd {
         margin: 0 0 0 auto;
     }
 }
@@ -3380,6 +3399,10 @@ input[type=range] {
         max-height: 50px;
     }
 
+    .footer--controls-hd {
+        display: none;
+    }
+
     .footer--controls.additional {
         opacity: 1;
         box-shadow: none;
@@ -3405,7 +3428,7 @@ input[type=range] {
     }
 }
 
-@media only screen and (min-width: 980px) {
+@media only screen and (min-width: 1010px) {
 
     .tooltip {
         &.tooltip--header {

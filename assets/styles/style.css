@@ -189,7 +189,7 @@ body.not-supported::before {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: url(../images/acoustic-guitar.svg), url(../images/add.svg), url(../images/author.png), url(../images/bass-guitar.svg), url(../images/bell.svg), url(../images/cello.svg), url(../images/check.svg), url(../images/check-black.svg), url(../images/check-empty.svg), url(../images/chimes.svg), url(../images/clear.svg), url(../images/clipboard-blank.svg), url(../images/clipboard-check.svg), url(../images/clipboard-failed.svg), url(../images/double-bass.svg), url(../images/down.svg), url(../images/down-chevron.svg), url(../images/download.svg), url(../images/download-mobile.svg), url(../images/drums.svg), url(../images/dry.svg), url(../images/ebow.svg), url(../images/effects.svg), url(../images/electric-guitar.svg), url(../images/featured.svg), url(../images/flat.svg), url(../images/github.svg), url(../images/hammond.svg), url(../images/harmonica.svg), url(../images/harmonics.svg), url(../images/headphones.svg), url(../images/help.svg), url(../images/info.svg), url(../images/key.svg), url(../images/keyboard.svg), url(../images/keys.svg), url(../images/left.svg), url(../images/load.svg), url(../images/locked.svg), url(../images/logo.png), url(../images/logo.svg), url(../images/logo-red.svg), url(../images/loop.svg), url(../images/metronome.svg), url(../images/mute.svg), url(../images/natural.svg), url(../images/note.svg), url(../images/notes.svg), url(../images/ocarina.svg), url(../images/octave.svg), url(../images/pause.svg), url(../images/piano.svg), url(../images/play.svg), url(../images/remove.svg), url(../images/rhodes.svg), url(../images/right.svg), url(../images/save.svg), url(../images/saxophone.svg), url(../images/settings.svg), url(../images/share.svg), url(../images/share-email.svg), url(../images/share-facebook.svg), url(../images/share-google.svg), url(../images/share-linkedin.svg), url(../images/share-pinterest.svg), url(../images/share-reddit.svg), url(../images/share-tumblr.svg), url(../images/share-twitter.svg), url(../images/share-vk.svg), url(../images/sharp.svg), url(../images/solo.svg), url(../images/solo-mobile.svg), url(../images/steel-tongue-drum.svg), url(../images/stereo.svg), url(../images/stop.svg), url(../images/synthesizer.svg), url(../images/unlocked.svg), url(../images/up.svg), url(../images/violin.svg), url(../images/volume.svg), url(../images/waterplea.svg);
+  background: url(../images/acoustic-guitar.svg), url(../images/add.svg), url(../images/author.png), url(../images/bass-guitar.svg), url(../images/bell.svg), url(../images/cello.svg), url(../images/chant.svg), url(../images/check.svg), url(../images/check-black.svg), url(../images/check-empty.svg), url(../images/chimes.svg), url(../images/clear.svg), url(../images/clipboard-blank.svg), url(../images/clipboard-check.svg), url(../images/clipboard-failed.svg), url(../images/double-bass.svg), url(../images/down.svg), url(../images/down-chevron.svg), url(../images/download.svg), url(../images/download-mobile.svg), url(../images/drums.svg), url(../images/dry.svg), url(../images/ebow.svg), url(../images/effects.svg), url(../images/electric-guitar.svg), url(../images/featured.svg), url(../images/flat.svg), url(../images/github.svg), url(../images/hammond.svg), url(../images/harmonica.svg), url(../images/harmonics.svg), url(../images/headphones.svg), url(../images/help.svg), url(../images/info.svg), url(../images/key.svg), url(../images/keyboard.svg), url(../images/keys.svg), url(../images/left.svg), url(../images/load.svg), url(../images/locked.svg), url(../images/logo.svg), url(../images/logo-red.svg), url(../images/loop.svg), url(../images/metronome.svg), url(../images/mute.svg), url(../images/natural.svg), url(../images/note.svg), url(../images/notes.svg), url(../images/ocarina.svg), url(../images/octave.svg), url(../images/organ.svg), url(../images/pause.svg), url(../images/piano.svg), url(../images/play.svg), url(../images/remove.svg), url(../images/rhodes.svg), url(../images/right.svg), url(../images/save.svg), url(../images/saxophone.svg), url(../images/settings.svg), url(../images/share.svg), url(../images/share-email.svg), url(../images/share-facebook.svg), url(../images/share-google.svg), url(../images/share-linkedin.svg), url(../images/share-pinterest.svg), url(../images/share-reddit.svg), url(../images/share-tumblr.svg), url(../images/share-twitter.svg), url(../images/share-vk.svg), url(../images/sharp.svg), url(../images/solo.svg), url(../images/solo-mobile.svg), url(../images/steel-tongue-drum.svg), url(../images/stereo.svg), url(../images/stop.svg), url(../images/synthesizer.svg), url(../images/unlocked.svg), url(../images/up.svg), url(../images/violin.svg), url(../images/volume.svg), url(../images/waterplea.svg);
   background-size: 0;
 }
 .content::before {
@@ -480,7 +480,7 @@ header {
   display: inline-block;
   width: 80px;
   height: 80px;
-  background: url(../images/logo.png);
+  background: url(../images/chant.svg);
   background-size: 100%;
 }
 .header--logo::after {
@@ -520,6 +520,23 @@ header {
   display: inline-block;
   vertical-align: middle;
   height: 100%;
+}
+.header--controls-hd,
+.footer--controls-hd {
+  vertical-align: middle;
+}
+.header--controls-hd span,
+.footer--controls-hd span {
+  opacity: 0.3;
+  font-weight: 600;
+}
+.header--controls-hd input,
+.footer--controls-hd input {
+  margin: 0;
+}
+.header--controls-hd input:checked + span,
+.footer--controls-hd input:checked + span {
+  opacity: 1;
 }
 .header--controls-play,
 .header--controls-share,
@@ -1771,7 +1788,7 @@ footer {
   -webkit-focus-ring-color: rgba(255, 255, 255, 0) !important;
   outline: none !important;
 }
-.footer--mobile .footer--controls-help {
+.footer--mobile .footer--controls-hd {
   margin: 0 0 0 auto;
 }
 .accidentals--piano {
@@ -4420,6 +4437,9 @@ input[type=range]::-moz-range-thumb:hover {
   footer.expanded {
     max-height: 50px;
   }
+  .footer--controls-hd {
+    display: none;
+  }
   .footer--controls.additional {
     opacity: 1;
     box-shadow: none;
@@ -4440,7 +4460,7 @@ input[type=range]::-moz-range-thumb:hover {
     display: block;
   }
 }
-@media only screen and (min-width: 980px) {
+@media only screen and (min-width: 1010px) {
   .tooltip.tooltip--header {
     bottom: auto;
     top: 120px;

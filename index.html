@@ -80,6 +80,7 @@
                 <button class="header--controls-keys" type="button" title="{{::translate('ui.accidentals')}}" data-ng-click="buttons.popup('accidentals', settings)"></button>
             </section>
             <section class="header--controls">
+                <label class="header--controls-hd" title="{{::translate('ui.hd')}}"><input data-ng-model="hd" type="checkbox" data-ng-change="toggleHd()"><span>HD</span></label>
                 <button class="header--controls-help" type="button" title="{{::translate('ui.help')}}" tabindex="-1"></button>
                 <button class="tooltip tooltip--header bottom center" tabindex="-1">
                     <div><span class="help--play"></span>{{::translate('help.play')}}</div>
@@ -121,6 +122,7 @@
                     <label class="footer--controls-loop" title="{{::translate('ui.loop')}}"><input data-ng-model="settings.loop" type="checkbox"><span></span></label>
                     <label class="footer--controls-keyboard" title="{{::translate('ui.keyboard')}}" data-ng-click="wakeSafari()"><input data-ng-model="settings.keyboard" type="checkbox"><span></span></label>
                     <button class="footer--controls-share" type="button" title="{{::translate('ui.share')}}" data-ng-click="buttons.share()"></button>
+                    <label class="footer--controls-hd" title="{{::translate('ui.hd')}}"><input data-ng-model="hd" type="checkbox" data-ng-change="toggleHd()"><span>HD</span></label>
                     <button class="footer--controls-help" type="button" title="{{::translate('ui.help')}}" tabindex="-1"></button>
                     <button class="tooltip tooltip--footer bottom center" tabindex="-1">
                         <div><span class="help--play"></span>{{::translate('help.play')}}</div>
